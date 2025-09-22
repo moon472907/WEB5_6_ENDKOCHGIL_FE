@@ -1,0 +1,65 @@
+@import "tailwindcss";
+
+/* === 색상 테마 정의 === */
+@theme {
+  /* 기본 */
+  --color-bg-main: #ece9e3;        /* 전체 배경 */
+  --color-basic-black: #1a1a1a;    /* 기본 텍스트(블랙) */
+
+  /* 버튼 */
+  --color-button-selected: #846240;
+  --color-button-unselected: #cfc8ba;
+  --color-button-disabled: #c9c9c9;
+  --color-button-active: #68513a;
+  --color-button-point: #473535;
+
+  /* 배경 (컴포넌트별) */
+  --color-bg-card-default: #cfc8ba;
+  --color-bg-card-active: #bab19e;
+  --color-bg-disabled: #d9d9d9;
+  --color-nuts-floor: #d0caba;
+
+  /* 태그 */
+  --color-tag-care: #26bd81;
+  --color-tag-habit: #ee9090;
+  --color-tag-study: #fd941a;
+  --color-tag-activity: #91a3fa;
+  --color-tag-etc: #9195a8;
+
+  /* 오렌지 */
+  --color-orange-main: #f78211;
+  --color-orange-sub: #e67e22;
+
+  /* 텍스트 세부 */
+  --color-text-sub: #997b64;
+  --color-text-disabled: #5f5f60;
+  --color-text-store-button: #686868;
+
+  /* 회색 단계 */
+  --color-gray-01: #f2f2f2;
+  --color-gray-02: #ececec;
+  --color-gray-03: #d7d7d7;
+  --color-gray-04: #7d7d7d;
+  --color-gray-05: #717171;
+  --color-gray-06: #646464;
+  --color-gray-07: #5e5e5e;
+  --color-gray-08: #4b4b4b;
+  --color-gray-09: #383838;
+  --color-gray-10: #2c2c2c;
+
+  /* 기타 */
+  --color-border-coin: #baa9a2;
+  --color-border-card-disabled: #a6a6a6;
+  --color-border-input: #828282;
+  --color-basic-white: #f9f9f9;
+}
+
+/* === 전역 reset/폰트/기본 적용 === */
+@layer base {
+  html {
+    font-family: Pretendard, sans-serif;
+  }
+  body {
+    @apply bg-basic-white text-basic-black;
+  }
+}

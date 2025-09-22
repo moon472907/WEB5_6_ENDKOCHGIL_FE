@@ -2,7 +2,7 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=mac,windows,node,visualstudiocode
 
 #!! ERROR: mac is undefined. Use list command to see defined gitignore types !!#
-
+next-env.d.ts
 ### Node ###
 # Logs
 logs
