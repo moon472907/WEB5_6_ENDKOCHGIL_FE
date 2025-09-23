@@ -8,12 +8,23 @@ export default function Page() {
 
   return (
     <>
-      <div className="bg-tag-care text-8xl leading-normal">가나다라마바사 아자차카파타하</div>
-      <div className="bg-tag-care text-8xl leading-normal">가나다라마바사 아자차카파타하</div>
-      <div className="bg-tag-care text-8xl leading-normal">가나다라마바사 아자차카파타하</div>
-      <div className="bg-tag-care text-8xl leading-normal">가나다라마바사 아자차카파타하</div>
-      <div className="bg-tag-care text-8xl leading-normal">가나다라마바사 아자차카파타하</div>
-      <Toggle checked={checked} onChange={setChecked} leftLabel='전체 보기' rightLabel='전체 안 보기' />
+      <div className="bg-tag-care text-3xl">test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test</div>
+      <div className="bg-tag-care text-3xl">test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test</div>
+      <div className="bg-tag-care text-3xl">test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test</div>
+      <div className="bg-tag-care text-3xl">test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test</div>
+      <div className="bg-tag-care text-3xl">test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test</div>
+      <div className="bg-tag-care text-3xl">test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test</div>
+      <div className="bg-tag-care text-3xl">test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test</div>
+      <div className="bg-tag-care text-3xl">test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test</div>
+      <div className="bg-tag-care text-3xl">test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test</div>
+      <div className="bg-tag-care text-3xl">test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test</div>
+      <div className="bg-tag-care text-3xl">test test test test test test test test test test test test test test test test test test test test test test test test test test test test test test</div>
+      <Toggle
+        checked={checked}
+        onChange={setChecked}
+        leftLabel="전체 보기"
+        rightLabel="전체 안 보기"
+      />
     </>
   );
 }
