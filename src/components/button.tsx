@@ -1,6 +1,8 @@
+'use client';
+
 import React from 'react';
 
-type Variant = 'selected' | 'unselected' | 'disabled' | 'active' | 'point';
+type Variant = 'selected' | 'unselected' | 'disabled' | 'active' | 'point' | 'white';
 type Size = 'sm' | 'md' | 'lg';
 
 interface ButtonProps {
@@ -26,9 +28,10 @@ const variantVarMap: Record<Variant, { bgVar: string; textColor: string }> = {
     bgVar: '--color-button-unselected',
     textColor: '--color-button-point'
   },
-  disabled: { bgVar: '--color-button-disabled', textColor: '#5E5E5E' },
+  disabled: { bgVar: '--color-button-disabled', textColor: '#ffffff' },
   active: { bgVar: '--color-button-active', textColor: '#ffffff' },
-  point: { bgVar: '--color-button-point', textColor: '#ffffff' }
+  point: { bgVar: '--color-button-point', textColor: '#ffffff' },
+  white: { bgVar: '--color-basic-white', textColor: '#1a1a1a' }
 };
 
 function Button({
@@ -43,15 +46,18 @@ function Button({
 }: ButtonProps) {
 
   const { bgVar, textColor } = variantVarMap[variant];
-  const bgValue = `var(${bgVar}, ${
-    variant === 'unselected' ? '#cfc8ba' : '#68513a'
-  })`;
+  const bgValue = `var(${bgVar}, ${variant === 'unselected' ? '#cfc8ba' : '#68513a'})`;
   const disabledBgColor = 'var(--color-button-disabled)';
+
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (disabled) return;
+    onClick?.(e);
+  };
 
   return (
     <button
       type={type}
-      onClick={onClick}
+      onClick={handleClick}
       disabled={disabled}
       className={`inline-flex items-center justify-center rounded-md font-medium shadow-sm ${sizeStyles[size]} ${className}`}
       style={{
