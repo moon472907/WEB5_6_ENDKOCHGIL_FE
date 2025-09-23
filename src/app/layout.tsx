@@ -1,7 +1,5 @@
 import AppWrapper from '@/components/layout/AppWrapper';
 import './globals.css';
-import Nav from '@/components/nav/Nav';
-import Header from '@/components/layout/Header';
 
 export default function RootLayout({
   children
@@ -11,11 +9,7 @@ export default function RootLayout({
   return (
     <html lang="ko-KR">
       <body>
-        <AppWrapper>
-          <Header title="test" />
-          {children}
-          <Nav />
-        </AppWrapper>
+        <AppWrapper>{children}</AppWrapper>
       </body>
     </html>
   );
