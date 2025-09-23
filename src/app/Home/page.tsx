@@ -1,10 +1,10 @@
-import CheckboxWrapper from "./components/CheckboxWrapper"
+import CheckboxWrapper from './components/CheckboxWrapper';
 
 function page() {
   return (
-   <div>
+    <div>
       <CheckboxWrapper />
     </div>
-  )
+  );
 }
-export default page
+export default page;
