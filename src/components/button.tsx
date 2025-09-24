@@ -1,16 +1,15 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 
 type Variant =
   | 'basic'
   | 'unselected'
   | 'disabled'
-  | 'active'
-  | 'point'
   | 'detail'
   | 'cancel';
 type Size = 'sm' | 'md' | 'lg';
+type ButtonState = 'default' | 'hover' | 'active';
 
 interface ButtonProps {
   children: React.ReactNode;
@@ -29,23 +28,82 @@ const sizeStyles = {
   lg: 'text-lg px-5 py-3'
 };
 
-const variantVarMap: Record<
-  Variant,
-  { bgVar: string; textColor: string; border?: string }
-> = {
-  basic: { bgVar: '--color-button-selected', textColor: '#f9f9f9' },
-  unselected: {
-    bgVar: '--color-button-unselected',
-    textColor: '#473535'
+type StyleSet = {
+  bg: string;
+  text: string;
+  border?: string;
+};
+
+const variantVarMap: Record<Variant, Record<ButtonState, StyleSet>> = {
+  basic: {
+    default: {
+      bg: 'var(--color-button-selected)',
+      text: 'var(--color-basic-white)'
+    },
+    hover: {
+      bg: 'var(--color-button-hover-basic)',
+      text: 'var(--color-basic-white)'
+    },
+    active: {
+      bg: 'var(--color-button-active)',
+      text: 'var(--color-basic-white)'
+    }
   },
-  disabled: { bgVar: '--color-button-disabled', textColor: '#5e5e5e' },
-  active: { bgVar: '--color-button-active', textColor: '#f9f9f9' },
-  point: { bgVar: '--color-button-point', textColor: '#f9f9f9' },
-  detail: { bgVar: '--color-basic-white', textColor: '#1a1a1a' },
+  unselected: {
+    default: {
+      bg: 'var(--color-button-unselected)',
+      text: 'var(--color-button-point)'
+    },
+    hover: {
+      bg: 'var(--color-button-hover-unselected)',
+      text: 'var(--color-button-point)'
+    },
+    active: {
+      bg: 'var(--color-button-active)',
+      text: 'var(--color-basic-white)'
+    }
+  },
+  disabled: {
+    default: {
+      bg: 'var(--color-button-disabled)',
+      text: 'var(--color-gray-07)'
+    },
+    hover: {
+      bg: 'var(--color-button-disabled)',
+      text: 'var(--color-gray-07)'
+    },
+    active: {
+      bg: 'var(--color-button-disabled)',
+      text: 'var(--color-gray-07)'
+    }
+  },
+  detail: {
+    default: {
+      bg: 'var(--color-basic-white)',
+      text: 'var(--color-basic-black)'
+    },
+    hover: {
+      bg: 'var(--color-button-hover-detail)',
+      text: 'var(--color-basic-black)'
+    },
+    active: { bg: 'var(--color-gray-02)', text: 'var(--color-basic-black)' }
+  },
   cancel: {
-    bgVar: '--color-basic-white',
-    textColor: '#473535',
-    border: '1px solid #473535'
+    default: {
+      bg: 'var(--color-basic-white)',
+      text: 'var(--color-button-point)',
+      border: '1px solid var(--color-button-point)'
+    },
+    hover: {
+      bg: 'var(--color-button-hover-cancel)',
+      text: 'var(--color-button-point)',
+      border: '1px solid var(--color-button-point)'
+    },
+    active: {
+      bg: 'var(--color-gray-02)',
+      text: 'var(--color-basic-black)',
+      border: '1px solid var(--color-button-point)'
+    }
   }
 };
 
@@ -59,28 +117,31 @@ function Button({
   onClick,
   type
 }: ButtonProps) {
-
-  const { bgVar, textColor, border } = variantVarMap[variant];
-  const bgValue = `var(${bgVar}, ${variant === 'unselected' ? '#cfc8ba' : '#68513a'})`;
-  const disabledBgColor = 'var(--color-button-disabled)';
+  const [state, setState] = useState<ButtonState>('default');
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (disabled) return;
     onClick?.(e);
   };
 
+  const styleSet = variantVarMap[variant][state];
+
   return (
     <button
       type={type}
       onClick={handleClick}
       disabled={disabled}
+      onMouseEnter={() => setState('hover')}
+      onMouseLeave={() => setState('default')}
+      onMouseDown={() => setState('active')}
+      onMouseUp={() => setState('hover')}
       className={`inline-flex items-center justify-center rounded-md font-medium shadow-sm ${sizeStyles[size]} ${className}`}
       style={{
-        backgroundColor: disabled ? disabledBgColor : bgValue,
-        color: textColor,
+        backgroundColor: styleSet.bg,
+        color: styleSet.text,
+        border: styleSet.border ?? 'none',
         cursor: disabled ? 'not-allowed' : 'pointer',
-        width: fullWidth ? '100%' : 'auto',
-        border: border ?? 'none'
+        width: fullWidth ? '100%' : 'auto'
       }}
       aria-disabled={disabled}
     >
@@ -88,4 +149,5 @@ function Button({
     </button>
   );
 }
+
 export default Button;
