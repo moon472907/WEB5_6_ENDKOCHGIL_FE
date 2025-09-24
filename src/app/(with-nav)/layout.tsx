@@ -7,7 +7,7 @@ export default function Layout({
 }) {
   return (
     <>
-      <main className="flex-1 p-4 pb-[calc(65px+16px)]">{children}</main>
+      {children}
       <Nav />
     </>
   );
