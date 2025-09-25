@@ -2,7 +2,7 @@
 
 import BaseModal from './BaseModal';
 import Image from 'next/image';
-import Button from '../button';
+import Button from '../ui/Button';
 
 interface Props {
   open: boolean;
