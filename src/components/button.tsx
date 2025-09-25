@@ -91,18 +91,18 @@ const variantVarMap: Record<Variant, Record<ButtonState, StyleSet>> = {
   cancel: {
     default: {
       bg: 'var(--color-basic-white)',
-      text: 'var(--color-button-point)',
-      border: '1px solid var(--color-button-point)'
+      text: 'var(--color-button-selected)',
+      border: '1px solid var(--color-button-selected)'
     },
     hover: {
       bg: 'var(--color-button-hover-cancel)',
-      text: 'var(--color-button-point)',
-      border: '1px solid var(--color-button-point)'
+      text: 'var(--color-button-selected)',
+      border: '1px solid var(--color-button-selected)'
     },
     active: {
       bg: 'var(--color-gray-02)',
       text: 'var(--color-basic-black)',
-      border: '1px solid var(--color-button-point)'
+      border: '1px solid var(--color-button-selected)'
     }
   }
 };
