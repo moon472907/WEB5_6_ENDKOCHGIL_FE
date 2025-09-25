@@ -4,6 +4,7 @@ import ContentWrapper from '@/components/layout/ContentWrapper';
 import Header from '@/components/layout/Header';
 import AlertModal from '@/components/modal/AlertModal';
 import ConfirmModal from '@/components/modal/ConfirmModal';
+import ScrollButton from '@/components/ui/ScrollButton';
 import Toggle from '@/components/ui/Toggle';
 import { useState } from 'react';
 
@@ -129,6 +130,9 @@ export default function Page() {
           description="획득 조건 : 레벨 5렙 달성"
           detail="“누구의 도움도 필요 없어! 혼자서도 충분히 강해지는 중.”"
         />
+
+        <ScrollButton direction='top' />
+        <ScrollButton direction='bottom' />
       </ContentWrapper>
     </>
   );
