@@ -36,7 +36,7 @@ export default function ExperienceBar({
       >
         {/* 채움 */}
         <div
-          className="h-full bg-[var(--color-orange-main)] transition-all duration-150"
+          className="h-full rounded-full bg-[var(--color-orange-main)] transition-all duration-150"
           style={{ width: `${pct}%` }}
         />
       </div>
