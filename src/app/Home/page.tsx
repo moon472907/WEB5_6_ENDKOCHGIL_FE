@@ -1,4 +1,4 @@
-import Coin from '@/components/Coin';
+import Coin from '@/components/ui/Coin';
 import CheckboxWrapper from './components/CheckboxWrapper';
 
 function page() {
