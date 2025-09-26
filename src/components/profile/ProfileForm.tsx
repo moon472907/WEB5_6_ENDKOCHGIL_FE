@@ -13,7 +13,7 @@ import { isValidDay, isValidMonth, isValidYear } from '@/utils/validation';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-export default function Page() {
+export default function ProfileForm() {
   const [nickname, setNickname] = useState('');
   const [gender, setGender] = useState<'남성' | '여성' | null>(null);
   const [birth, setBirth] = useState({ year: '', month: '', day: '' });
@@ -32,7 +32,6 @@ export default function Page() {
     const birthDate = formatBirthDate(birth.year, birth.month, birth.day);
 
     try {
-      // TODO: end point .env 에 세팅하기?
       await modifyProfile({
         name: nickname,
         birth: birthDate,
