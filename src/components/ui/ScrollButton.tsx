@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { IoMdArrowUp, IoMdArrowDown } from 'react-icons/io';
-import { animateScroll as scroll } from 'react-scroll';
 
 type Props = {
   direction: 'top' | 'bottom';
@@ -26,9 +25,12 @@ export default function ScrollButton({ direction }: Props) {
 
   const handleClick = () => {
     if (direction === 'top') {
-      scroll.scrollToTop({ duration: 200, smooth: 'easeInOutQuad' });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
-      scroll.scrollToBottom({ duration: 200, smooth: 'easeInOutQuad' });
+      window.scrollTo({
+        top: document.documentElement.scrollHeight,
+        behavior: 'smooth'
+      });
     }
   };
 
