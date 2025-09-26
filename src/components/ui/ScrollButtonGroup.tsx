@@ -9,8 +9,8 @@ interface Props {
 
 export default function ScrollButtonGroup({withNav = false}: Props){
   return (
-    <div className={tw('sticky flex justify-end', withNav ? 'bottom-[calc(65px+16px)]':'bottom-4')}>
-      <div className='flex flex-col gap-2'>
+    <div className={tw('sticky flex justify-end pointer-events-none', withNav ? 'bottom-[calc(65px+16px)]':'bottom-4')}>
+      <div className='flex flex-col gap-2 pointer-events-auto'>
         <ScrollButton direction="top" />
         <ScrollButton direction="bottom" />
       </div>
