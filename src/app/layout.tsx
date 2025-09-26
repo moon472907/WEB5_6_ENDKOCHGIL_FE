@@ -10,6 +10,7 @@ export default function RootLayout({
     <html lang="ko-KR">
       <body>
         <AppWrapper>{children}</AppWrapper>
+        <div id="modal-root" />
       </body>
     </html>
   );
