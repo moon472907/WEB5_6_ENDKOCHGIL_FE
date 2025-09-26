@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import PartyCard from './PartyCard';
 import CustomSelect from '@/app/(with-nav)/parties/components/CustomSelect';
+import HotCarousel from './HotCarousel';
 
 // API 응답 스펙을 반영한 mock 데이터 (내부 사용)
 const mockApiResponse = [
@@ -46,7 +47,7 @@ const mockApiResponse = [
     currentMembers: 6,
     maxMembers: 10,
     isPublic: true,
-    category: 'activity',
+    category: 'exercise',
     startAt: '2025-09-20T00:00:00Z',
     endAt: '2025-10-20T23:59:59Z'
   },
@@ -67,6 +68,9 @@ const items = mockApiResponse;
 export default function PartyList() {
   const [sort, setSort] = useState<'views' | 'latest'>('views');
   const [category, setCategory] = useState<string>('');
+
+  // 필터된 항목 계산 (HotCarousel과 리스트에 동일하게 사용)
+  const visible = items.filter(p => (category ? p.category?.toLowerCase().includes(category) : true));
 
   return (
     <div className="space-y-4">
@@ -99,7 +103,7 @@ export default function PartyList() {
               options={[
                 { label: '전체', value: '' },
                 { label: '학습', value: 'study' },
-                { label: '운동', value: 'activity' },
+                { label: '운동', value: 'exercise' },
                 { label: '생활 습관', value: 'habit' },
                 { label: '멘탈 케어', value: 'care' },
                 { label: '기타', value: 'etc' }
@@ -109,25 +113,31 @@ export default function PartyList() {
         </div>
       </div>
 
-      <h3 className="text-lg font-semibold text-basic-black">
-        이번 주 HOT 모집 🔥
-      </h3>
+      <h3 className="text-lg font-semibold text-basic-black">이번 주 HOT 모집 🔥</h3>
 
-      {items
-        .filter(p =>
-          category ? p.category?.toLowerCase().includes(category) : true
-        )
-        .map(p => (
-          <PartyCard
-            key={p.id}
-            category={p.category}
-            isPublic={p.isPublic}
-            title={p.name}
-            startAt={p.startAt}
-            endAt={p.endAt}
-            people={`${p.currentMembers}/${p.maxMembers}`}
-          />
-        ))}
+      {/* 상위 4개를 캐러셀로 표시 */}
+      <HotCarousel
+        items={visible.slice(0, 4).map(p => ({
+          id: p.id,
+          name: p.name,
+          category: p.category,
+          startAt: p.startAt,
+          endAt: p.endAt
+        }))}
+      />
+
+      {/* 나머지는 기존 카드로 렌더 */}
+      {visible.map(p => (
+        <PartyCard
+          key={p.id}
+          category={p.category}
+          isPublic={p.isPublic}
+          title={p.name}
+          startAt={p.startAt}
+          endAt={p.endAt}
+          people={`${p.currentMembers}/${p.maxMembers}`}
+        />
+      ))}
     </div>
   );
 }

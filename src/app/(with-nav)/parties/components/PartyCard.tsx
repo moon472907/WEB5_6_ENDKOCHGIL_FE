@@ -1,3 +1,5 @@
+'use client';
+
 import Button from '@/components/ui/Button';
 import Tag from '@/components/ui/Tag';
 import React from 'react';
@@ -16,23 +18,23 @@ export default function PartyCard({
   endAt?: string;
   people?: string;
 }) {
-  // Variant 키(study|activity|habit|care|etc)를 우선 허용하고,
+  // Variant 키(study|exercise|habit|care|etc)를 우선 허용하고,
   // 한글/문구가 들어올 경우 기존 매핑으로 처리
-  const VALID_VARIANTS = ['care', 'habit', 'study', 'activity', 'etc'] as const;
+  const VALID_VARIANTS = ['care', 'habit', 'study', 'exercise', 'etc'] as const;
   const mapTag = (t?: string) => {
     if (!t) return 'etc' as const;
     const s = t.replace(/\s+/g, '').toLowerCase();
     if ((VALID_VARIANTS as readonly string[]).includes(s)) {
       return s as (typeof VALID_VARIANTS)[number];
     }
-    if (s.includes('운동')) return 'activity' as const;
-    if (s.includes('학습') || s.includes('영어') || s.includes('단어')) return 'study' as const;
+    if (s.includes('운동')) return 'exercise' as const;
+    if (s.includes('학습')) return 'study' as const;
     if (s.includes('생활')) return 'habit' as const;
     if (s.includes('멘탈') || s.includes('케어')) return 'care' as const;
     return 'etc' as const;
   };
 
-  // variant 키(study/activity/...)가 들어오면 한글 라벨로 변환해서 보여주기
+  // variant 키(study/exercise/...)가 들어오면 한글 라벨로 변환해서 보여주기
   const variantToKorean = (t?: string) => {
     if (!t) return '기타';
     const s = t.replace(/\s+/g, '').toLowerCase();
@@ -40,7 +42,7 @@ export default function PartyCard({
       care: '멘탈 케어',
       habit: '생활 습관',
       study: '학습',
-      activity: '운동',
+      exercise: '운동',
       etc: '기타'
     };
     if ((VALID_VARIANTS as readonly string[]).includes(s)) return map[s];
@@ -100,9 +102,6 @@ export default function PartyCard({
             </Button>
             <Button variant="basic" size="md" className="rounded-full">
               참여하기
-            </Button>
-            <Button variant="cancel" size="md" className="rounded-full">
-              나중에 할래요
             </Button>
           </div>
         </div>
