@@ -24,9 +24,8 @@ function SocialLoginButton({
   };
 
   return (
-    // TODO: 리다이렉트 주소 로딩창으로 변경 -> 로딩창에서 첫로그인인지 api 검증 -> response에 따라 profile or home 으로 리다이렉트
     <a
-      href={`http://localhost:8080/oauth2/authorization/${providerMap[provider]}?redirectUrl=http://localhost:3000/home`}
+      href={`http://localhost:8080/oauth2/authorization/${providerMap[provider]}?redirectUrl=http://localhost:3000/profile-setup`}
       className={`w-full max-w-[328px] h-[48px] flex justify-center gap-3 items-center rounded-lg shadow-[0_4px_4px_rgba(0,0,0,0.25)] cursor-pointer ${className}`}
     >
       <Image
