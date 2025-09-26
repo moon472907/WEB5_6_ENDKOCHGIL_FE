@@ -10,17 +10,33 @@ interface SocialLoginButtonProps {
   className: string;
 }
 
-function SocialLoginButton({ provider, logoSrc, logoWidth, logoHeight, className }: SocialLoginButtonProps) {
+function SocialLoginButton({
+  provider,
+  logoSrc,
+  logoWidth,
+  logoHeight,
+  className
+}: SocialLoginButtonProps) {
+  const providerMap: Record<Provider, string> = {
+    카카오: 'kakao',
+    네이버: 'naver',
+    구글: 'google'
+  };
+
   return (
-    // TODO : Link? api 호출? onclick? 어떻게 구현되는지 모르겠음 => api 명세서 이후에 작업
-    <button
-      className={`w-full max-w-[328px] h-[48px] rounded-lg shadow-[0_4px_4px_rgba(0,0,0,0.25)] cursor-pointer ${className}`}
+    <a
+      href={`${process.env.NEXT_PUBLIC_API_BASE_URL}/oauth2/authorization/${providerMap[provider]}?redirectUrl=${process.env.NEXT_PUBLIC_CLIENT_URL}/profile`}
+      className={`w-full max-w-[328px] h-[48px] flex justify-center gap-3 items-center rounded-lg shadow-[0_4px_4px_rgba(0,0,0,0.25)] cursor-pointer ${className}`}
     >
-      <div className='flex justify-center gap-3 items-center'>
-        <Image src={logoSrc} alt={`${provider} 로고`} width={logoWidth} height={logoHeight} style={{ width: `${logoWidth}px`, height: `${logoHeight}px` }}/>
-        <span className="font-semibold">{provider}로 로그인하기</span>
-      </div>
-    </button>
+      <Image
+        src={logoSrc}
+        alt={`${provider} 로고`}
+        width={logoWidth}
+        height={logoHeight}
+        style={{ width: `${logoWidth}px`, height: `${logoHeight}px` }}
+      />
+      <span className="font-semibold">{provider}로 로그인하기</span>
+    </a>
   );
 }
 export default SocialLoginButton;
