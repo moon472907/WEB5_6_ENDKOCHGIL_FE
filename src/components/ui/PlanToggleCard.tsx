@@ -37,8 +37,7 @@ export default function PlanToggleCard({
 
       {/* 토글 영역 */}
       <ToggleContent open={open}>
-        <div className="pb-5">{children}</div>
-        <div className="border-b border-[#A1A1A2]" />
+        <div className="pb-3">{children}</div>
       </ToggleContent>
     </div>
   );
