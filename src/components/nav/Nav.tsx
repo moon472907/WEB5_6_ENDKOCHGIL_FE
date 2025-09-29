@@ -37,7 +37,7 @@ function Nav() {
       selectedIcon: ProgressSelectedIcon
     },
     {
-      to: '#',
+      to: '/settings',
       label: '설정',
       defaultIcon: SettingsDefaultIcon,
       selectedIcon: SettingsSelectedIcon
