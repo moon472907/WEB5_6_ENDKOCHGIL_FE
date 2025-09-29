@@ -49,7 +49,7 @@ export default function NoticeToggleCard({
       {/* 토글 영역 */}
       <ToggleContent open={open} className="bg-bg-card-default">
         <div className="p-5">
-          <div className="text-basic-black text-sm mb-4">{content}</div>
+          <div className="text-basic-black text-sm mb-4 break-words whitespace-pre-line">{content}</div>
           <span className="block text-right text-sm font-semibold text-gray-04">
             {date}
           </span>

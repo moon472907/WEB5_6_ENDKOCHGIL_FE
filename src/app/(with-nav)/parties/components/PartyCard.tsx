@@ -2,14 +2,17 @@
 
 import Button from '@/components/ui/Button';
 import Tag from '@/components/ui/Tag';
-import React from 'react';
+import ConfirmModal from '@/components/modal/ConfirmModal';
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function PartyCard({
   category,
   title,
   startAt,
   endAt,
-  people
+  people,
+  id
 }: {
   category?: string;
   isPublic?: boolean;
@@ -17,6 +20,7 @@ export default function PartyCard({
   startAt?: string;
   endAt?: string;
   people?: string;
+  id?: number | string;
 }) {
   // Variant 키(study|exercise|habit|care|etc)를 우선 허용하고,
   // 한글/문구가 들어올 경우 기존 매핑으로 처리
@@ -71,6 +75,8 @@ export default function PartyCard({
 
   const startText = formatKoreanDate(startAt);
   const weeks = calcWeeks(startAt, endAt);
+  const [openConfirm, setOpenConfirm] = useState(false);
+  const router = useRouter();
 
   return (
     <article className="rounded-2xl bg-bg-card-default p-4 shadow-sm border border-transparent">
@@ -100,12 +106,36 @@ export default function PartyCard({
             <Button variant="detail" size="md">
               자세히
             </Button>
-            <Button variant="basic" size="md" className="rounded-full">
+            <Button
+              variant="basic"
+              size="md"
+              className="rounded-full"
+              onClick={() => setOpenConfirm(true)}
+            >
               참여하기
             </Button>
           </div>
         </div>
       </div>
+
+      {/* 참여 확인 모달 */}
+      <ConfirmModal
+        open={openConfirm}
+        lines={[`${title}에 참여하시겠습니까?`]}
+        onCancel={() => setOpenConfirm(false)}
+        onConfirm={() => {
+          setOpenConfirm(false);
+          // id가 있으면 /parties/:id, 없으면 title 기반 슬러그로 이동
+          if (id) {
+            router.push(`/partydetail/${id}`);
+          } else {
+            router.push(`/partydetail/${encodeURIComponent(title)}`);
+          }
+        }}
+        confirmText="참여하기"
+        cancelText="취소"
+        variant="happy"
+      />
     </article>
   );
 }

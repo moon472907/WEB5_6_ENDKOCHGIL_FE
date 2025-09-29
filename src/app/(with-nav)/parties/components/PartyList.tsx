@@ -113,23 +113,29 @@ export default function PartyList() {
         </div>
       </div>
 
-      <h3 className="text-lg font-semibold text-basic-black">이번 주 HOT 모집 🔥</h3>
 
-      {/* 상위 4개를 캐러셀로 표시 */}
-      <HotCarousel
-        items={visible.slice(0, 4).map(p => ({
-          id: p.id,
-          name: p.name,
-          category: p.category,
-          startAt: p.startAt,
-          endAt: p.endAt
-        }))}
-      />
+      {/* 카테고리 필터가 적용된 경우 HOT 섹션 숨김 */}
+      {category === '' && (
+        <>
+        <h3 className="text-lg font-semibold text-basic-black">이번 주 HOT 모집 🔥</h3>
+          {/* 상위 4개를 캐러셀로 표시 */}
+          <HotCarousel
+            items={visible.slice(0, 4).map(p => ({
+              id: p.id,
+              name: p.name,
+              category: p.category,
+              startAt: p.startAt,
+              endAt: p.endAt
+            }))}
+          />
+        </>
+      )}
 
       {/* 나머지는 기존 카드로 렌더 */}
       {visible.map(p => (
         <PartyCard
           key={p.id}
+          id={p.id}
           category={p.category}
           isPublic={p.isPublic}
           title={p.name}

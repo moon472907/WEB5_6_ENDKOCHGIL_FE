@@ -25,7 +25,7 @@ function Nav() {
       selectedIcon: HomeSelectedIcon
     },
     {
-      to: '#',
+      to: '/parties',
       label: '모집',
       defaultIcon: RecruitDefaultIcon,
       selectedIcon: RecruitSelectedIcon
@@ -37,7 +37,7 @@ function Nav() {
       selectedIcon: ProgressSelectedIcon
     },
     {
-      to: '#',
+      to: '/settings',
       label: '설정',
       defaultIcon: SettingsDefaultIcon,
       selectedIcon: SettingsSelectedIcon
