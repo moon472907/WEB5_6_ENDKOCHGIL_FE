@@ -38,7 +38,7 @@ export default function ProfileForm() {
         gender: genderMap[gender]
       });
 
-      router.push('/home');
+      router.push('/');
     } catch (error) {
       // TODO : alert? modal? toast?
       console.error('프로필 입력 에러 발생:', error);

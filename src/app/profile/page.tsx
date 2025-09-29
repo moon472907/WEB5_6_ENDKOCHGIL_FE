@@ -14,7 +14,7 @@ export default async function Page() {
   const data = await res.json();
 
   if (data.success && data.content.valid) {
-    redirect('/home');
+    redirect('/');
   }
 
   return <ProfileForm />;
