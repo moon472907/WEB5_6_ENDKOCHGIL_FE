@@ -10,6 +10,8 @@ interface Props {
   title: string;
   description?: string;
   detail?: string;
+  disabled?: boolean;
+  disabledMessage?: string; 
 }
 
 function AlertModal({
@@ -18,7 +20,9 @@ function AlertModal({
   confirmText = '적용',
   title,
   description,
-  detail
+  detail,
+  disabled = false,
+  disabledMessage
 }: Props) {
   return (
     <BaseModal isOpen={open} onClose={onConfirm}>
@@ -43,8 +47,16 @@ function AlertModal({
           size="md"
           fullWidth
         >
-          {confirmText}
+          {disabled ? '닫기' : confirmText}
         </Button>
+
+        {/* 비활성화 안내 문구 */}
+        {disabled && disabledMessage && (
+          <p className="mt-2 text-sm text-red-600 text-center">
+            {disabledMessage}
+          </p>
+        )}
+
       </div>
     </BaseModal>
   );

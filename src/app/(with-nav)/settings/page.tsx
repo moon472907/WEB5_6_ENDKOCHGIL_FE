@@ -1,10 +1,15 @@
+'use client'
+
 import ContentWrapper from "@/components/layout/ContentWrapper";
-import Button from "@/components/ui/Button";
+import ConfirmModal from "@/components/modal/ConfirmModal";
+import SettingButton from "@/components/ui/SettingButton";
+import Link from "next/link";
+import { useState } from "react";
 import { MdHelpOutline, MdLogout, MdPersonOutline } from "react-icons/md";
 
 export default function Page() {
-
-  const settingButtonClass = "justify-start text-base text-basic-black font-semibold rounded-xl";
+  const [logoutOpen, setLogoutOpen] = useState(false); // 로그아웃 모달 열림 상태
+  const [unregisterOpen, setUnregisterOpen] = useState(false); // 회원탈퇴 모달 열림 상태
 
   return (
     <>
@@ -27,12 +32,16 @@ export default function Page() {
             <span className="text-base font-semibold text-button-point">프로필</span>
           </div>
           <div className="flex flex-col gap-2.5">
-            <Button variant="unselected" size="md" fullWidth className={settingButtonClass}>
-            프로필 수정
-            </Button>
-            <Button variant="unselected" size="md" fullWidth className={settingButtonClass}>
-            칭호 수정
-            </Button>
+            <Link href="/settings/profile">
+              <SettingButton>
+                프로필 수정
+              </SettingButton>
+            </Link>
+            <Link href="/settings/title">
+              <SettingButton>
+                칭호 수정
+              </SettingButton>
+            </Link>
           </div>
         </div>
 
@@ -43,12 +52,20 @@ export default function Page() {
             <span className="text-base font-semibold text-button-point">지원</span>
           </div>
           <div className="flex flex-col gap-2.5">
-            <Button variant="unselected" size="md" fullWidth className={settingButtonClass}>
-              공지사항
-            </Button>
-            <Button variant="unselected" size="md" fullWidth className={settingButtonClass}>
-            문의 / 버그 / FAQ
-            </Button>
+            <Link href="/settings/notice">
+              <SettingButton>
+                공지사항
+              </SettingButton>
+            </Link>
+            <a
+              href="https://github.com/prgrms-web-devcourse-final-project/WEB5_6_ENDKOCHGIL_FE/discussions"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <SettingButton>
+                문의 / 버그 / FAQ
+              </SettingButton>
+            </a>
           </div>
         </div>
 
@@ -59,14 +76,36 @@ export default function Page() {
             <span className="text-base font-semibold text-button-point">계정 관리</span>
           </div>
           <div className="flex flex-col gap-2.5">
-            <Button variant="unselected" size="md" fullWidth className={settingButtonClass}>
+            <SettingButton onClick={() => setLogoutOpen(true)}>
               로그아웃
-            </Button>
-            <Button variant="unselected" size="md" fullWidth className={settingButtonClass}>
+            </SettingButton>
+            <SettingButton onClick={() => setUnregisterOpen(true)}>
               회원 탈퇴
-            </Button>
+            </SettingButton>
           </div>
         </div>
+
+        {/* 모달 영역 */}
+
+        {/* 로그아웃 */}
+        <ConfirmModal
+          open={logoutOpen}
+          onConfirm={() => setLogoutOpen(false)}
+          onCancel={() => setLogoutOpen(false)}
+          variant="sad"
+          lines={['로그아웃 하시겠습니까?']}
+        />
+
+        {/* 회원탈퇴 */}
+        <ConfirmModal
+          open={unregisterOpen}
+          onConfirm={() => setUnregisterOpen(false)}
+          onCancel={() => setUnregisterOpen(false)}
+          variant="sad"
+          lines={['탈퇴 후에는 복구가 어려워요','그래도 진행하시겠습니까?']}
+        />
+
+
       </ContentWrapper>
     </>
   );
