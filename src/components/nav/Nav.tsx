@@ -25,7 +25,7 @@ function Nav() {
       selectedIcon: HomeSelectedIcon
     },
     {
-      to: '#',
+      to: '/parties',
       label: '모집',
       defaultIcon: RecruitDefaultIcon,
       selectedIcon: RecruitSelectedIcon

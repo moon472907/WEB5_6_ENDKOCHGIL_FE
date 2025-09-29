@@ -66,3 +66,31 @@
     @apply bg-basic-white text-basic-black;
   }
 }
+
+
+/* === 스크롤바 스타일 === */
+.scrollbar {
+  scrollbar-width: auto; /* Firefox */
+  scrollbar-color: var(--color-orange-nuts, #E98E3E) var(--color-gray-01, #f2f2f2);
+}
+
+.scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.scrollbar::-webkit-scrollbar-track {
+  background: var(--color-gray-01, #f2f2f2);
+  border-radius: 8px;
+}
+
+.scrollbar::-webkit-scrollbar-thumb {
+  background-color: var(--color-orange-nuts, #E98E3E);
+  border-radius: 8px;
+}
+
+/* 얇은 스크롤바 */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
