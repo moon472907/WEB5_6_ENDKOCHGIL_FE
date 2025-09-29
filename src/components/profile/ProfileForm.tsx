@@ -7,7 +7,7 @@ import Button from '@/components/ui/Button';
 import GenderSelect from '@/components/ui/GenderSelect';
 import NicknameInput from '@/components/ui/NicknameInput';
 import { genderMap } from '@/constants/gender';
-import { modifyProfile } from '@/lib/api/member';
+import { putProfile } from '@/lib/api/member';
 import { formatBirthDate } from '@/utils/date';
 import { isValidDay, isValidMonth, isValidYear } from '@/utils/validation';
 import { useRouter } from 'next/navigation';
@@ -41,13 +41,13 @@ export default function ProfileForm({ mode = 'create', initialData }: Props) {
     const birthDate = formatBirthDate(birth.year, birth.month, birth.day);
 
     try {
-      await modifyProfile({
+      await putProfile({
         name: nickname,
         birth: birthDate,
         gender: genderMap[gender]
       });
 
-      router.push('/home');
+      router.push('/');
     } catch (error) {
       // TODO : alert? modal? toast?
       console.error('프로필 입력 에러 발생:', error);
