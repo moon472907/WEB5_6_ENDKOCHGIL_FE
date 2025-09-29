@@ -10,8 +10,8 @@ import Link from 'next/link';
 export default function Home() {
   return (
     <div className="flex flex-col min-h-dvh pb-20">
+      
       <section className="flex flex-col bg-basic-white py-4 px-5 gap-2 h-[180px]">
-        {/* 경험치바 */}
         <div className="flex items-center justify-between gap-5 ">
           <div className="flex bg-bg-main py-1.5 px-4 gap-2 rounded-xl w-full shadow-md">
             <Image
@@ -25,7 +25,6 @@ export default function Home() {
               <ExperienceBar current={200} max={500} />
             </div>
           </div>
-
           <button className="relative">
             <Image
               src="/images/bell.svg"
@@ -37,7 +36,6 @@ export default function Home() {
             <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
           </button>
         </div>
-
         <div>
           <Coin coin={100} />
         </div>
@@ -56,7 +54,6 @@ export default function Home() {
         </Link>
       </section>
 
-      {/* 오늘의 미션 */}
       <section className="flex flex-col gap-2 px-7 py-4">
         <div className="flex flex-col gap-9 px-2">
           <h2 className="text-lg font-semibold text-button-point">
@@ -69,20 +66,13 @@ export default function Home() {
             <span className="text-lg font-semibold text-text-sub">1/2</span>
           </div>
         </div>
-
-        {/* 미션 카드 */}
         <div className="flex flex-col gap-4">
-          {/* 미션 1 */}
           <MissionCard />
-          {/* 미션 2 */}
           <MissionCard />
         </div>
-
-        {/* 플로팅 버튼 */}
         <ScrollButtonGroup withNav />
       </section>
 
-      {/* 하단 네비게이션 */}
       <Nav />
     </div>
   );
