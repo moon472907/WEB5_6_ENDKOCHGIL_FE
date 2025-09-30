@@ -4,7 +4,7 @@ import { tw } from '@/lib/tw';
 import { useState } from 'react';
 
 interface TooltipProps {
-  message: string;
+  message: React.ReactNode;
   position?: 'top' | 'bottom';
   children: React.ReactNode;
 }

@@ -7,7 +7,7 @@ interface FormSectionProps {
   icon: string;
   alt: string;
   label: string;
-  tooltip?: string;
+  tooltip?: React.ReactNode;
   children: React.ReactNode;
   sibling?: boolean
 }

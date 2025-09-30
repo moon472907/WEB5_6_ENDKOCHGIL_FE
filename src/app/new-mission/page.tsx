@@ -9,12 +9,15 @@ import CustomSelectBox from './components/CustomSelectBox';
 import Button from '@/components/ui/Button';
 import FormSection from './components/FormSection';
 import GoalInput from './components/GoalInput';
+import { useRouter } from 'next/navigation';
 
 function Page() {
   const [goal, setGoal] = useState('');
   const [period, setPeriod] = useState<string | null>(null);
   const [maxPeople, setMaxPeople] = useState<string | null>(null);
   const [isPublic, setIsPublic] = useState(true);
+  const router = useRouter();
+
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,7 +28,9 @@ function Page() {
       period,
       isPublic
     });
+
     // TODO: API 연동
+    router.push('/new-mission/preview');
   };
 
   const maxPeopleOptions = [
@@ -42,8 +47,8 @@ function Page() {
     { value: '3', label: '3주일' },
     { value: '4', label: '4주일' }
   ];
-   return (
-    <div className="flex flex-col flex-1">
+  return (
+    <>
       <Header title="미션 생성" />
       <ContentWrapper withNav padding="xl">
         <form
@@ -91,14 +96,20 @@ function Page() {
                 icon="/images/lock.png"
                 alt="공개 여부"
                 label="공개 여부"
-                tooltip="비공개 설정 시 파티 모집에 등록되지 않습니다"
+                tooltip={
+                  <>
+                    비공개 설정 시 
+                    <br />
+                    파티 모집에 등록되지 않습니다
+                  </>
+                }
                 sibling={true}
               >
                 <Toggle checked={isPublic} onChange={setIsPublic} />
               </FormSection>
             </div>
             <div>
-              <Button type="submit" variant="basic" size="lg" fullWidth>
+              <Button type="submit" variant="basic" size="lg" fullWidth disabled={!goal || !period || !maxPeople}>
                 미션 생성
               </Button>
             </div>
@@ -107,7 +118,7 @@ function Page() {
           <Nav />
         </form>
       </ContentWrapper>
-    </div>
+    </>
   );
 }
 export default Page;
