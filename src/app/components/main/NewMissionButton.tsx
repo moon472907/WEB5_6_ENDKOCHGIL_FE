@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
-function AddMissionButton() {
+export default function NewMissionButton() {
   const router = useRouter();
 
   return (
@@ -16,7 +16,7 @@ function AddMissionButton() {
         >
           <Image
             src="/images/mission-plus.png"
-            alt="미션 플러스"
+            alt="미션 추가"
             width={30}
             height={30}
           />
@@ -25,4 +25,3 @@ function AddMissionButton() {
     </div>
   );
 }
-export default AddMissionButton;

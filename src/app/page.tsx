@@ -1,12 +1,11 @@
 import Nav from '@/components/nav/Nav';
-import ScrollButtonGroup from '@/components/ui/ScrollButtonGroup';
 import MissionCard from './components/main/MissionCard';
 import Coin from '@/components/ui/Coin';
 import { formatToday } from '@/utils/date';
 import ExperienceBar from '@/components/ui/ExperienceBar';
 import Image from 'next/image';
 import Link from 'next/link';
-import AddMissionButton from './components/main/AddMissionButton';
+import NewMissionButton from './components/main/NewMissionButton';
 
 export default function Home() {
   return (
@@ -71,8 +70,7 @@ export default function Home() {
           <MissionCard />
           <MissionCard />
         </div>
-        {/* <ScrollButtonGroup withNav /> */}
-        <AddMissionButton />
+        <NewMissionButton />
       </section>
 
       <Nav />
