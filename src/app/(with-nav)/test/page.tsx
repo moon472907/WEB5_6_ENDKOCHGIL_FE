@@ -4,6 +4,7 @@ import ContentWrapper from '@/components/layout/ContentWrapper';
 import Header from '@/components/layout/Header';
 import AlertModal from '@/components/modal/AlertModal';
 import ConfirmModal from '@/components/modal/ConfirmModal';
+import DayPlanItem from '@/components/ui/DayPlanItem';
 import NoticeToggleCard from '@/components/ui/NoticeToggleCard';
 import PlanToggleCard from '@/components/ui/PlanToggleCard';
 import ScrollButtonGroup from '@/components/ui/ScrollButtonGroup';
@@ -128,6 +129,11 @@ export default function Page() {
           content="안녕하세요, 다람쥐와 함께하는 목표 관리 서비스 Nutree가 드디어 오픈했습니다. 작은 도토리(목표)에서 시작해 큰 나무(성취)를 키워가는 여정을 지금부터 함께할 수 있어요. 앞으로 꾸준한 업데이트와 개선으로 더 나은 서비스를 제공하겠습니다. 많은 관심과 사랑 부탁드립니다!"
           date="2025.09.19"
         />
+
+        <DayPlanItem day={1} title="단어 10개 암기" variant="past" />
+        <DayPlanItem day={2} title="문법 공부" variant="current" />
+        <DayPlanItem day={3} title="문제 10개 풀기" variant="next" />
+        <DayPlanItem day={4} title="문제 100개 풀기" variant="next" />
 
         {/* 모달 영역 */}
         <ConfirmModal
