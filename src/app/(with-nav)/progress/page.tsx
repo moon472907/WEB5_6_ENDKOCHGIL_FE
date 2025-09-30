@@ -62,16 +62,15 @@ export default function Page() {
 
   return (
     <>
-      <ContentWrapper withNav className="relative">
+      <ContentWrapper withNav className="relative overflow-hidden pb-28 z-0">
         <div>
-          {/* 상단 일러스트 & 문구 */}
-          <div className="grid grid-cols-2 gap-3 items-center relative z-10">
+          {/* 상단 일러스트 문구 */}
+          <div className="flex justify-center gap-3 items-center relative">
             <Image
-              src="/cheerup.svg"
+              src="/images/cheerup.png"
               alt="진행 현황 일러스트"
               width={120}
               height={120}
-              className="mx-auto mb-2"
             />
             <div className="flex flex-col justify-center items-center text-center">
               <p className="text-lg text-basic-black leading-relaxed">
@@ -84,7 +83,7 @@ export default function Page() {
           </div>
 
           {/* 진행중 / 완료 버튼 */}
-          <div className="flex gap-4 relative z-10">
+          <div className="flex gap-4 relative">
             <Button
               variant={tab === 'ongoing' ? 'basic' : 'unselected'}
               size="md"
@@ -105,11 +104,10 @@ export default function Page() {
             </Button>
           </div>
 
-          {/* 카드 리스트 */}
-          <div className="mt-3 relative z-10 flex flex-col gap-y-3">
+          <div className="mt-3 relative flex flex-col gap-y-3 pb-24 z-20">
             {items.map(i => (
               <ProgressCard
-                key={i.id}
+                key={`${i.id}-${i.title}`}
                 id={i.id}
                 title={i.title}
                 tag={i.tag}
@@ -120,17 +118,16 @@ export default function Page() {
               />
             ))}
           </div>
+        </div>
 
-          {/* viewport 하단에 고정: 네비 위에 항상 위치 */}
-          <div className="absolute bottom-0 right-0 pointer-events-none z-0">
-            <Image
-              src="/sleep.svg"
-              alt="다람쥐"
-              width={500}
-              height={500}
-              className="object-contain"
-            />
-          </div>
+        <div className="fixed bottom-0 right-80 pointer-events-none">
+          <Image
+            src="/images/sleep.png"
+            alt="다람쥐"
+            width={500}
+            height={500}
+            className="object-contain"
+          />
         </div>
       </ContentWrapper>
     </>
