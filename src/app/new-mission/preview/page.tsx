@@ -3,7 +3,6 @@
 import ContentWrapper from '@/components/layout/ContentWrapper';
 import Header from '@/components/layout/Header';
 import Button from '@/components/ui/Button';
-import DayPlanItem from '@/components/ui/DayPlanItem';
 import LockPlanItem from '@/components/ui/LockPlanItem';
 import Tooltip from '@/components/ui/Tooltip';
 import Image from 'next/image';
@@ -11,8 +10,11 @@ import { FaExclamationTriangle } from 'react-icons/fa';
 import { useState } from 'react';
 import Divider from '@/components/ui/Divider';
 import WeekPlanSection from './components/WeekPlanSection';
+import { useRouter } from 'next/navigation';
 
 function Page() {
+  const router = useRouter();
+
   const [plans, setPlans] = useState({
     week1: [
       '단어 1개 암기',
@@ -40,6 +42,8 @@ function Page() {
     console.log('최종 확정된 계획:', plans);
 
     // TODO: API 요청
+    // 성공했을때 라우터변경
+    router.push('/');
   };
 
   return (
@@ -84,9 +88,15 @@ function Page() {
             </p>
 
             <main className="flex flex-col gap-5">
-              <WeekPlanSection weekLabel="단계별 계획 1주차" plans={plans.week1} />
+              <WeekPlanSection
+                weekLabel="단계별 계획 1주차"
+                plans={plans.week1}
+              />
               <Divider />
-              <WeekPlanSection weekLabel="단계별 계획 2주차" plans={plans.week2} />
+              <WeekPlanSection
+                weekLabel="단계별 계획 2주차"
+                plans={plans.week2}
+              />
               <Divider />
               <LockPlanItem label="단계별 계획 3주차" />
               <Divider />
