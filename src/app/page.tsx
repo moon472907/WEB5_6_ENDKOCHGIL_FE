@@ -1,11 +1,12 @@
 import Nav from '@/components/nav/Nav';
 import ScrollButtonGroup from '@/components/ui/ScrollButtonGroup';
-import MissionCard from './components/MissionCard';
+import MissionCard from './components/main/MissionCard';
 import Coin from '@/components/ui/Coin';
 import { formatToday } from '@/utils/date';
 import ExperienceBar from '@/components/ui/ExperienceBar';
 import Image from 'next/image';
 import Link from 'next/link';
+import AddMissionButton from './components/main/AddMissionButton';
 
 export default function Home() {
   return (
@@ -54,7 +55,7 @@ export default function Home() {
         </Link>
       </section>
 
-      <section className="flex flex-col gap-2 px-7 py-4">
+      <section className="flex flex-col gap-2 px-7 py-4 relative flex-1">
         <div className="flex flex-col gap-9 px-2">
           <h2 className="text-lg font-semibold text-button-point">
             {formatToday()}
@@ -70,7 +71,8 @@ export default function Home() {
           <MissionCard />
           <MissionCard />
         </div>
-        <ScrollButtonGroup withNav />
+        {/* <ScrollButtonGroup withNav /> */}
+        <AddMissionButton />
       </section>
 
       <Nav />
