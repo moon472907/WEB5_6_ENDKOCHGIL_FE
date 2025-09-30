@@ -19,7 +19,7 @@ function Header({ title, bgColor = 'main' }: Props) {
           type="button"
           aria-label="뒤로가기"
           onClick={() => router.back()}
-          className="absolute left-4 hover:cursor-pointer text-basic-black"
+          className="absolute left-2 p-2 cursor-pointer text-basic-black"
         >
           <MdKeyboardArrowLeft size={28}/>
         </button>
