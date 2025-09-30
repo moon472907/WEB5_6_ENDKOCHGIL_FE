@@ -8,8 +8,8 @@ interface FormSectionProps {
   alt: string;
   label: string;
   tooltip?: React.ReactNode;
-  children: React.ReactNode;
-  sibling?: boolean
+  children?: React.ReactNode;
+  rightElement?: React.ReactNode;
 }
 
 export default function FormSection({
@@ -18,11 +18,12 @@ export default function FormSection({
   label,
   tooltip,
   children,
-  sibling
+  rightElement
 }: FormSectionProps) {
   return (
     <section className="flex flex-col gap-2 w-full">
-      <div className="flex items-center gap-0.5 w-full">
+      <div className="flex items-center justify-between w-full">
+        <div className="flex items-center gap-0.5">
         <Image
           src={icon}
           alt={alt}
@@ -42,9 +43,10 @@ export default function FormSection({
             />
           </Tooltip>
         )}
-      {sibling && <div className="ml-auto">{children}</div>}
+        </div>
+      {rightElement}
       </div>
-      <div>{sibling ? '' : children}</div>
+      <div>{children}</div>
     </section>
   );
 }

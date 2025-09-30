@@ -10,6 +10,7 @@ import Button from '@/components/ui/Button';
 import FormSection from './components/FormSection';
 import GoalInput from './components/GoalInput';
 import { useRouter } from 'next/navigation';
+import { maxPeopleOptions, maxPeriodOptions } from '@/constants/missionOptions';
 
 function Page() {
   const [goal, setGoal] = useState('');
@@ -17,7 +18,6 @@ function Page() {
   const [maxPeople, setMaxPeople] = useState<string | null>(null);
   const [isPublic, setIsPublic] = useState(true);
   const router = useRouter();
-
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,20 +33,6 @@ function Page() {
     router.push('/new-mission/preview');
   };
 
-  const maxPeopleOptions = [
-    { value: '1', label: '1명' },
-    { value: '2', label: '2명' },
-    { value: '3', label: '3명' },
-    { value: '4', label: '4명' },
-    { value: '5', label: '5명' }
-  ];
-
-  const maxPeriodOptions = [
-    { value: '1', label: '1주일' },
-    { value: '2', label: '2주일' },
-    { value: '3', label: '3주일' },
-    { value: '4', label: '4주일' }
-  ];
   return (
     <>
       <Header title="미션 생성" />
@@ -98,18 +84,24 @@ function Page() {
                 label="공개 여부"
                 tooltip={
                   <>
-                    비공개 설정 시 
+                    비공개 설정 시
                     <br />
                     파티 모집에 등록되지 않습니다
                   </>
                 }
-                sibling={true}
-              >
-                <Toggle checked={isPublic} onChange={setIsPublic} />
-              </FormSection>
+                rightElement={
+                  <Toggle checked={isPublic} onChange={setIsPublic} />
+                }
+              ></FormSection>
             </div>
             <div>
-              <Button type="submit" variant="basic" size="lg" fullWidth disabled={!goal || !period || !maxPeople}>
+              <Button
+                type="submit"
+                variant="basic"
+                size="lg"
+                fullWidth
+                disabled={!goal || !period || !maxPeople}
+              >
                 미션 생성
               </Button>
             </div>
