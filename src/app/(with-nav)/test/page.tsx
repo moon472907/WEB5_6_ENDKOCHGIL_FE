@@ -118,10 +118,11 @@ export default function Page() {
           얼럿 모달 열기
         </button>
 
-        <PlanToggleCard title="단계별 계획 1주차">
-          <div>1일차 : 단어 10개 암기</div>
-          <div>2일차 : 문법 공부</div>
-          <div>3일차 : 문제 10개 풀기</div>
+        <PlanToggleCard title="단계별 계획 1주차" className='space-y-2'>
+          <DayPlanItem day={1} title="단어 10개 암기" variant="past" />
+          <DayPlanItem day={2} title="문법 공부" variant="current" />
+          <DayPlanItem day={3} title="문제 10개 풀기" variant="next" />
+          <DayPlanItem day={4} title="문제 100개 풀기" variant="next" />
         </PlanToggleCard>
 
         <NoticeToggleCard
