@@ -5,6 +5,7 @@ import Tag from '@/components/ui/Tag';
 import ConfirmModal from '@/components/modal/ConfirmModal';
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { mapTag, variantToKorean } from '@/lib/tag';
 
 export default function PartyCard({
   category,
@@ -22,38 +23,6 @@ export default function PartyCard({
   people?: string;
   id?: number | string;
 }) {
-  // Variant 키(study|exercise|habit|care|etc)를 우선 허용하고,
-  // 한글/문구가 들어올 경우 기존 매핑으로 처리
-  const VALID_VARIANTS = ['care', 'habit', 'study', 'exercise', 'etc'] as const;
-  const mapTag = (t?: string) => {
-    if (!t) return 'etc' as const;
-    const s = t.replace(/\s+/g, '').toLowerCase();
-    if ((VALID_VARIANTS as readonly string[]).includes(s)) {
-      return s as (typeof VALID_VARIANTS)[number];
-    }
-    if (s.includes('운동')) return 'exercise' as const;
-    if (s.includes('학습')) return 'study' as const;
-    if (s.includes('생활')) return 'habit' as const;
-    if (s.includes('멘탈') || s.includes('케어')) return 'care' as const;
-    return 'etc' as const;
-  };
-
-  // variant 키(study/exercise/...)가 들어오면 한글 라벨로 변환해서 보여주기
-  const variantToKorean = (t?: string) => {
-    if (!t) return '기타';
-    const s = t.replace(/\s+/g, '').toLowerCase();
-    const map: Record<string, string> = {
-      care: '멘탈 케어',
-      habit: '생활 습관',
-      study: '학습',
-      exercise: '운동',
-      etc: '기타'
-    };
-    if ((VALID_VARIANTS as readonly string[]).includes(s)) return map[s];
-    // 이미 한글로 온 경우 원본 문자열 그대로 반환
-    return t;
-  };
-
   // 시작일 포맷: "2025년 9월 21일"
   const formatKoreanDate = (iso?: string) => {
     if (!iso) return '';

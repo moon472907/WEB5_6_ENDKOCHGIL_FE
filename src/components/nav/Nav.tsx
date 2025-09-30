@@ -31,7 +31,7 @@ function Nav() {
       selectedIcon: RecruitSelectedIcon
     },
     {
-      to: '#',
+      to: '/progress',
       label: '진행도',
       defaultIcon: ProgressDefaultIcon,
       selectedIcon: ProgressSelectedIcon
