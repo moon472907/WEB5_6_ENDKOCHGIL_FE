@@ -30,11 +30,11 @@ export default function CustomSelect({
   const selectedLabel = options.find((o) => o.value === value)?.label ?? placeholder;
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className="relative inline-block"> {/* inline-block으로 부모 flex에서 정렬 쉬움 */}
       <button
         type="button"
         onClick={() => setOpen(s => !s)}
-        className="flex items-center justify-between w-28 px-4 py-2 rounded-full bg-basic-white border border-gray-03 shadow-sm text-sm cursor-pointer hover:border-gray-04"
+        className="flex items-center justify-between min-w-[120px] h-10 px-3 py-2 rounded-lg bg-basic-white border border-border-card-disabled text-sm cursor-pointer hover:border-gray-04"
         aria-haspopup="listbox"
         aria-expanded={open}
       >
@@ -48,7 +48,7 @@ export default function CustomSelect({
         <ul
           role="listbox"
           tabIndex={-1}
-          className="absolute z-50 mt-2 min-w-26 bg-basic-white rounded-xl shadow-lg border border-gray-03 overflow-hidden"
+          className="absolute z-50 mt-2 min-w-30 bg-basic-white rounded-lg shadow-lg border border-border-card-disabled overflow-hidden"
         >
           {options.map(opt => (
             <li key={opt.value}>
@@ -58,7 +58,7 @@ export default function CustomSelect({
                   onChangeAction(opt.value);
                   setOpen(false);
                 }}
-                className="w-full text-center px-4 py-3 has-hover:bg-gray-02 active:bg-gray-02 text-sm cursor-pointer"
+                className="w-full text-left px-4 py-3 has-hover:bg-gray-02 active:bg-gray-02 text-sm cursor-pointer"
               >
                 {opt.label}
               </button>

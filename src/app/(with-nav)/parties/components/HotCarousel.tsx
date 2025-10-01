@@ -3,8 +3,9 @@
 import React from 'react';
 import Tag, { type Variant as TagVariant } from '@/components/ui/Tag';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay } from 'swiper/modules';
+import { Autoplay, Navigation, Pagination } from 'swiper/modules';
 import 'swiper/css';
+import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 
 type Item = {
@@ -34,21 +35,26 @@ export default function HotCarousel({ items }: { items: Item[] }) {
   const slides: Item[][] = [];
   for (let i = 0; i < items.length; i += itemsPerSlide) slides.push(items.slice(i, i + itemsPerSlide));
 
+  const enableLoop = slides.length > 1;
+
   return (
-    <div className="w-full">
+    <div className="w-full relative overflow-visible">
       <Swiper
-        modules={[Autoplay]}
+        modules={[Autoplay, Navigation, Pagination]}
         slidesPerView={1}
-        pagination={false}
+        spaceBetween={20}
+        loop={enableLoop}
+        navigation={false}
+        pagination={{ clickable: true }}
         autoplay={{ delay: 3000, disableOnInteraction: false }}
-        loop={slides.length > 1}
+        className="overflow-visible"
       >
         {slides.map((group, idx) => (
           <SwiperSlide key={idx}>
-            <div className="flex gap-3">
+            <div className="flex gap-3 py-2">
               {group.map(it => (
                 <div key={it.id} className="flex-1">
-                  <div className="rounded-xl bg-bg-card-default p-4 h-28 flex flex-col justify-between shadow-sm">
+                  <div className="rounded-xl bg-bg-card-default p-4 h-28 flex flex-col justify-between shadow-md">
                     <div className="flex items-start justify-between gap-3">
                       <Tag
                         variant={(it.category as TagVariant) ?? 'etc'}
@@ -57,8 +63,8 @@ export default function HotCarousel({ items }: { items: Item[] }) {
                         {mapLabel(it.category)}
                       </Tag>
                     </div>
-                    <h4 className="font-semibold text-base mb-1">{it.name}</h4>
-                    <p className="text-sm text-[var(--color-text-sub)]">
+                    <h4 className="font-semibold text-base">{it.name}</h4>
+                    <p className="text-sm text-text-sub">
                       {it.startAt
                         ? `${new Date(it.startAt).toLocaleDateString()}`
                         : ''}{' '}

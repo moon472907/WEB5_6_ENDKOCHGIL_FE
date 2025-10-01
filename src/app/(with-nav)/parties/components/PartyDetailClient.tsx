@@ -57,7 +57,7 @@ export default function PartyDetailClient({ partyId }: { partyId: string }) {
         {members.map(m => (
           <div
             key={m.id}
-            className="relative rounded-lg bg-basic-white p-3 flex flex-col items-center shadow-sm"
+            className="relative rounded-lg bg-basic-white p-3 flex flex-col items-center text-center shadow-sm"
           >
             <div className="w-20 h-20 bg-gray-100 rounded-md flex items-center justify-center mb-2">
               <span className="text-base font-semibold text-gray-08">
@@ -92,7 +92,7 @@ export default function PartyDetailClient({ partyId }: { partyId: string }) {
       </div>
 
       {/* 채팅 박스 */}
-      <div className="rounded-lg bg-basic-white p-3">
+      <div className="rounded-xl bg-basic-white p-3">
         <div
           ref={messagesRef}
           className="h-40 overflow-auto p-2 space-y-2 scrollbar scrollbar-thin scrollbar-thumb-orange-nuts scrollbar-track-[rgba(0,0,0,0.04)]"
@@ -118,7 +118,7 @@ export default function PartyDetailClient({ partyId }: { partyId: string }) {
       </div>
 
       <div className="mt-3">
-        <div className="relative rounded-2xl bg-basic-white focus-within:ring-2 focus-within:ring-orange-nuts">
+        <div className="relative rounded-xl bg-basic-white focus-within:ring-2 focus-within:ring-orange-nuts">
           <div className="flex items-center gap-2 px-3 py-2">
             <input
               value={text}

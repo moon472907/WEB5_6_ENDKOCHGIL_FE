@@ -15,7 +15,7 @@ export default function Home() {
         <div className="flex items-center justify-between gap-5 ">
           <div className="flex bg-bg-main py-1.5 px-4 gap-2 rounded-xl w-full shadow-md group">
             <Image
-              src="/images/acorn.png"
+              src="/images/acorn.svg"
               alt="도토리"
               width={30}
               height={30}

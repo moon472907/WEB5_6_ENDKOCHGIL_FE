@@ -75,7 +75,7 @@ export default function Page() {
             <div className="flex flex-col justify-center items-center text-center">
               <p className="text-lg text-basic-black leading-relaxed">
                 이번주 평균 달성률은{' '}
-                <strong className="text-orange-main">{average}%</strong>!!
+                <strong className="text-orange-main">{average}%</strong>
                 <br />
                 조금만 더 힘내볼까요?🔥
               </p>
@@ -118,14 +118,20 @@ export default function Page() {
           </div>
         </div>
 
-        <div className="fixed bottom-0 right-2/6 pointer-events-none">
-          <Image
-            src="/images/sleep.png"
-            alt="다람쥐"
-            width={500}
-            height={500}
-            className="object-contain"
-          />
+        {/* ContentWrapper 기준으로 내부에 고정(항상 wrapper 내부에 머물도록) */}
+        <div className="absolute bottom-0 right-0 pointer-events-none z-0">
+          <div
+            className="pointer-events-none w-[500px] min-w-[500px] max-w-[600px]"
+            style={{ transform: 'translateX(8%)' }}
+          >
+            <Image
+              src="/images/sleep.png"
+              alt="다람쥐"
+              width={500}
+              height={500}
+              className="w-full h-auto object-contain"
+            />
+          </div>
         </div>
       </ContentWrapper>
     </>

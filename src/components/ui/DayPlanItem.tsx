@@ -64,8 +64,10 @@ export default function DayPlanItem({ day, title, variant, onSave }: Props) {
 
       {variant === 'next' && (
         <button
+        type="button"
           onClick={() => (isEditing ? handleSave() : setIsEditing(true))}
           className="text-button-point cursor-pointer"
+
         >
           {isEditing ? <MdCheck /> : <MdEdit />}
         </button>

@@ -48,7 +48,7 @@ export default function PartyCard({
   const router = useRouter();
 
   return (
-    <article className="rounded-2xl bg-bg-card-default p-4 shadow-sm border border-transparent">
+    <article className="rounded-2xl bg-bg-card-default p-4 shadow-md border border-transparent cursor-pointer focus:outline-none">
       <div className="flex items-start gap-4">
         <div className="flex-1">
           <div className="flex items-center justify-between">
