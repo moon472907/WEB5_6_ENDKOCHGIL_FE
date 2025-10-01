@@ -1,7 +1,7 @@
 'use client';
 
 import { tw } from '@/lib/tw';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 interface TooltipProps {
   message: React.ReactNode;
@@ -15,13 +15,31 @@ export default function Tooltip({
   children
 }: TooltipProps) {
   const [visible, setVisible] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setVisible(false);
+      }
+    }
+
+    if (visible) {
+      document.addEventListener('click', handleClickOutside);
+    } else {
+      document.removeEventListener('click', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [visible]);
 
   return (
     <div
+      ref={ref}
       className="relative inline-block"
-      onMouseEnter={() => setVisible(true)}
-      onMouseLeave={() => setVisible(false)}
-      onClick={() => setVisible(prev => !prev)}
+      onClick={() => setVisible(true)}
     >
       {children}
       {visible && (
@@ -34,7 +52,6 @@ export default function Tooltip({
             position === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'
           )}
         >
-          {' '}
           {message}
         </div>
       )}

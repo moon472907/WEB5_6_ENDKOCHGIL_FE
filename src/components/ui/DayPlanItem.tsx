@@ -9,9 +9,10 @@ interface Props {
   day: number;
   title: string;
   variant: Variant;
+  onSave?: (nextTitle: string) => void; // 추가: 부모에 저장 요청
 }
 
-export default function DayPlanItem({ day, title, variant }: Props) {
+export default function DayPlanItem({ day, title, variant, onSave }: Props) {
   const [isEditing, setIsEditing] = useState(false);
   const [value, setValue] = useState(title);
 
@@ -20,6 +21,7 @@ export default function DayPlanItem({ day, title, variant }: Props) {
 
   const handleSave = () => {
     setIsEditing(false);
+    if (value !== title) onSave?.(value); // 부모로 변경 전달
   };
 
   // editing 시작되면 input에 포커스 주기
@@ -44,9 +46,15 @@ export default function DayPlanItem({ day, title, variant }: Props) {
       <div className="flex-1 mr-2">
         {isEditing ? (
           <input
-            ref={inputRef}  // ref 연결
+            ref={inputRef} // ref 연결
             value={value}
             onChange={e => setValue(e.target.value)}
+            onKeyDown={e => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSave();
+              }
+            }}
             className="px-2 w-full bg-transparent outline-1 outline-button-point rounded-lg font-semibold text-base text-button-point h-full"
           />
         ) : (
@@ -56,8 +64,10 @@ export default function DayPlanItem({ day, title, variant }: Props) {
 
       {variant === 'next' && (
         <button
+        type="button"
           onClick={() => (isEditing ? handleSave() : setIsEditing(true))}
           className="text-button-point cursor-pointer"
+
         >
           {isEditing ? <MdCheck /> : <MdEdit />}
         </button>
