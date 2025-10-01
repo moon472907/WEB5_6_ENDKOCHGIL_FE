@@ -36,7 +36,7 @@ function Page() {
   return (
     <>
       <Header title="미션 생성" />
-      <ContentWrapper withNav padding="xl">
+      <ContentWrapper padding="xl">
         <form
           onSubmit={handleSubmit}
           className="flex flex-col flex-1 gap-5 text-stone-800 font-semibold h-full"
@@ -107,7 +107,6 @@ function Page() {
             </div>
           </section>
 
-          <Nav />
         </form>
       </ContentWrapper>
     </>

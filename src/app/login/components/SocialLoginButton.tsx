@@ -27,6 +27,8 @@ function SocialLoginButton({
     <a
       href={`${process.env.NEXT_PUBLIC_API_BASE_URL}/oauth2/authorization/${providerMap[provider]}?redirectUrl=${process.env.NEXT_PUBLIC_CLIENT_URL}/profile`}
       className={`w-full max-w-[328px] h-[48px] flex justify-center gap-3 items-center rounded-lg shadow-[0_4px_4px_rgba(0,0,0,0.25)] cursor-pointer ${className}`}
+      aria-label={`${provider}로 로그인`}
+      role="button"
     >
       <Image
         src={logoSrc}
