@@ -6,12 +6,14 @@ type Props = {
   withNav?: boolean;
   children: React.ReactNode;
   padding?: PaddingSize;
+  className?: string;
 };
 
 export default function ContentWrapper({
   withNav,
   children,
-  padding = 'sm'
+  padding = 'sm',
+  className
 }: Props) {
   const paddingClass = {
     sm: 'p-4', // 16px
@@ -22,7 +24,7 @@ export default function ContentWrapper({
 
   return (
     <main
-      className={tw('flex flex-col flex-1', paddingClass, withNav && 'pb-[calc(65px+16px)]')}
+      className={tw('flex flex-col flex-1', paddingClass, withNav && 'pb-[calc(65px+16px)]', className)}
     >
       {children}
     </main>

@@ -68,17 +68,25 @@ const items = mockApiResponse;
 export default function PartyList() {
   const [sort, setSort] = useState<'views' | 'latest'>('views');
   const [category, setCategory] = useState<string>('');
+  const [query, setQuery] = useState<string>('');
 
-  // 필터된 항목 계산 (HotCarousel과 리스트에 동일하게 사용)
-  const visible = items.filter(p => (category ? p.category?.toLowerCase().includes(category) : true));
+  const visible = items.filter(p => {
+    const matchesCategory = category ? p.category?.toLowerCase().includes(category) : true;
+    const matchesQuery = p.name.toLowerCase().includes(query.toLowerCase());
+    return matchesCategory && matchesQuery;
+  });
 
   return (
     <div className="space-y-4">
-      {/* 검색/필터 박스 */}
       <div className="rounded-xl bg-bg-card-default p-4 shadow-sm">
         <input
-          className="w-full rounded-lg border border-border-input px-3 py-2 mb-3 bg-basic-white"
+          suppressHydrationWarning
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          className="w-full rounded-lg border border-border-input px-3 py-2 mb-3 bg-basic-white focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-sub"
           placeholder="무엇을 함께 하실래요?"
+          // 모바일의 기본 탭 하이라이트 제거 (WebKit)
+          style={{ WebkitTapHighlightColor: 'transparent' }}
         />
         <div className="flex gap-3">
           <div className="w-30">
@@ -113,11 +121,12 @@ export default function PartyList() {
         </div>
       </div>
 
-
       {/* 카테고리 필터가 적용된 경우 HOT 섹션 숨김 */}
       {category === '' && (
         <>
-        <h3 className="text-lg font-semibold text-basic-black">이번 주 HOT 모집 🔥</h3>
+          <h3 className="text-lg font-semibold text-basic-black">
+            이번 주 HOT 모집 🔥
+          </h3>
           {/* 상위 4개를 캐러셀로 표시 */}
           <HotCarousel
             items={visible.slice(0, 4).map(p => ({
