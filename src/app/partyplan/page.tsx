@@ -73,7 +73,7 @@ export default function Page() {
     }
   ]);
 
-  // "수정 완료" 클릭 핸들러 — 서버 호출 후 상태 갱신 로직으로 교체하세요
+  // "수정 완료" 클릭 핸들러
   const handleConfirm = async (weekId: number) => {
     setWeeks(prev =>
       prev.map(w =>
