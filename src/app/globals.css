@@ -97,7 +97,7 @@
 
 /* === Swiper Pagination 커스터마이징 === */
 .swiper-pagination {
-  bottom: -4px !important;
+  bottom: -7px !important;
   text-align: center;
 }
 
