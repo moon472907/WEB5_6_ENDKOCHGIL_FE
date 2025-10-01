@@ -56,7 +56,7 @@ export default function Page() {
     <div className="flex flex-col h-screen overflow-hidden pb-14">
       {/* 헤더 영역 */}
       <div className="relative flex-none">
-        <Header title="상점" bgColor="white" />
+        <Header title={tab === 'shop' ? '상점' : '옷장'} bgColor="white" />
         <div className="absolute right-4 top-0 h-14 flex items-center z-[60]">
           <Coin coin={100} />
         </div>
