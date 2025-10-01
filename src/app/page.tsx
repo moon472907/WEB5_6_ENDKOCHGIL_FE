@@ -13,7 +13,7 @@ export default function Home() {
       
       <section className="flex flex-col bg-basic-white py-4 px-5 gap-2 h-[180px]">
         <div className="flex items-center justify-between gap-5 ">
-          <div className="flex bg-bg-main py-1.5 px-4 gap-2 rounded-xl w-full shadow-md">
+          <div className="flex bg-bg-main py-1.5 px-4 gap-2 rounded-xl w-full shadow-md group">
             <Image
               src="/images/acorn.png"
               alt="도토리"

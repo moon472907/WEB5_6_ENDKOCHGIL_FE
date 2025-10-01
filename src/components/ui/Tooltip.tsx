@@ -1,7 +1,7 @@
 'use client';
 
 import { tw } from '@/lib/tw';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 interface TooltipProps {
   message: React.ReactNode;
@@ -15,29 +15,46 @@ export default function Tooltip({
   children
 }: TooltipProps) {
   const [visible, setVisible] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setVisible(false);
+      }
+    }
+
+    if (visible) {
+      document.addEventListener('click', handleClickOutside);
+    } else {
+      document.removeEventListener('click', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [visible]);
 
   return (
     <div
-      className="relative inline-block"
-      onMouseEnter={() => setVisible(true)}
-      onMouseLeave={() => setVisible(false)}
-      onClick={() => setVisible(prev => !prev)}
+      ref={ref}
+      className="relative inline-block cursor-pointer"
+      onClick={() => setVisible(true)}
     >
       {children}
-      {visible && (
         <div
           className={tw(
             'absolute -translate-x-2 whitespace-nowrap',
             'rounded-xl bg-basic-white text-button-point text-sm font-semibold p-3',
             'shadow-[0_4px_4px_rgba(0,0,0,0.25)]',
             'max-w-[80vw] break-words',
-            position === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'
+            'transition-opacity duration-300',
+            position === 'top' ? 'bottom-full mb-2' : 'top-full mt-2',
+            visible ? 'opacity-100' : 'opacity-0'
           )}
         >
-          {' '}
           {message}
         </div>
-      )}
     </div>
   );
 }

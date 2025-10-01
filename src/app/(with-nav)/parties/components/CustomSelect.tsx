@@ -58,7 +58,7 @@ export default function CustomSelect({
                   onChangeAction(opt.value);
                   setOpen(false);
                 }}
-                className="w-full text-center px-4 py-3 hover:bg-gray-02 text-sm"
+                className="w-full text-center px-4 py-3 has-hover:bg-gray-02 active:bg-gray-02 text-sm cursor-pointer"
               >
                 {opt.label}
               </button>
