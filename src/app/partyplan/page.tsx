@@ -8,6 +8,7 @@ import Button from '@/components/ui/Button';
 import { useState } from 'react';
 import LockPlanItem from '@/components/ui/LockPlanItem';
 import Divider from '@/components/ui/Divider';
+import ConfirmModal from '@/components/modal/ConfirmModal';
 
 type WeekState = 'confirmed' | 'current' | 'next' | 'locked';
 
@@ -74,6 +75,10 @@ export default function Page() {
     }
   ]);
 
+  // 모달 제어: 수정 완료 확인용
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pendingWeekId, setPendingWeekId] = useState<number | null>(null);
+
   // "수정 완료" 클릭 핸들러
   const handleConfirm = async (weekId: number) => {
     setWeeks(prev =>
@@ -139,7 +144,14 @@ export default function Page() {
                     {/* 수정 완료 버튼: 실제 표시되는 상태(effectiveWeekState)가 'next'인 경우에만, + 파티장일 때만 노출 */}
                     {effectiveWeekState === 'next' && isLeader && (
                       <div className="mt-3 flex justify-end">
-                        <Button variant="basic" fullWidth onClick={() => handleConfirm(w.id)}>
+                        <Button
+                          variant="basic"
+                          fullWidth
+                          onClick={() => {
+                            setPendingWeekId(w.id);
+                            setConfirmOpen(true);
+                          }}
+                        >
                           수정 완료
                         </Button>
                       </div>
@@ -152,6 +164,22 @@ export default function Page() {
           </div>
         </div>
       </ContentWrapper>
+
+      <ConfirmModal
+        open={confirmOpen}
+        lines={['계획을 수정하시겠어요?']}
+        onConfirm={() => {
+          if (pendingWeekId !== null) handleConfirm(pendingWeekId);
+          setConfirmOpen(false);
+          setPendingWeekId(null);
+        }}
+        onCancel={() => {
+          setConfirmOpen(false);
+          setPendingWeekId(null);
+        }}
+        confirmText="확인"
+        cancelText="취소"
+      />
     </>
   );
 }
