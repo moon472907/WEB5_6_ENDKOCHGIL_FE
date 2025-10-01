@@ -93,8 +93,8 @@ export default function ProgressCard({
       onMouseLeave={handleCancelActive}
       onTouchStart={() => setIsActive(true)}
       onTouchEnd={handleCancelActive}
-      className="rounded-2xl bg-bg-card-default p-4 shadow-sm border border-transparent cursor-pointer focus:outline-none"
-      style={{ backgroundColor: isActive ? 'var(--color-bg-card-active)' : undefined }}
+      className="rounded-2xl bg-bg-card-default p-4 shadow-md border border-transparent cursor-pointer focus:outline-none"
+      style={{ backgroundColor: isActive ? 'bg-bg-card-active' : undefined }}
     >
       <div className="flex items-start justify-between gap-3">
         <div>

@@ -103,3 +103,24 @@
   width: 6px;
   height: 6px;
 }
+
+/* === Swiper Pagination 커스터마이징 === */
+.swiper-pagination {
+  bottom: -7px !important;
+  text-align: center;
+}
+
+.swiper-pagination-bullet {
+  background-color: var(--color-gray-04);
+  opacity: 1;
+  width: 10px;
+  height: 10px;
+  margin: 0 6px;
+  border-radius: 50%;
+}
+
+.swiper-pagination-bullet-active {
+  background: var(--color-orange-main) !important;
+  width: 12px;
+  height: 12px;
+}
