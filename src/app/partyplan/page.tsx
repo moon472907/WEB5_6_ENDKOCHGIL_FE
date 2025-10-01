@@ -5,8 +5,9 @@ import PlanToggleCard from '@/components/ui/PlanToggleCard';
 import DayPlanItem from '@/components/ui/DayPlanItem';
 import Tag from '@/components/ui/Tag';
 import Button from '@/components/ui/Button';
-import LockPlanItem from './components/LockPlanItem';
 import { useState } from 'react';
+import LockPlanItem from '@/components/ui/LockPlanItem';
+import Divider from '@/components/ui/Divider';
 
 type WeekState = 'confirmed' | 'current' | 'next' | 'locked';
 
@@ -73,7 +74,7 @@ export default function Page() {
     }
   ]);
 
-  // "수정 완료" 클릭 핸들러 — 서버 호출 후 상태 갱신 로직으로 교체하세요
+  // "수정 완료" 클릭 핸들러
   const handleConfirm = async (weekId: number) => {
     setWeeks(prev =>
       prev.map(w =>
@@ -101,50 +102,51 @@ export default function Page() {
           <div className="text-md text-text-sub">일주일 전부터 미션 확인과 수정이 가능해요!</div>
 
           <div className="space-y-3">
-            {weeks.map(w => {
+            {weeks.map((w, idx) => {
               // 비회원(또는 파티장이 아닌 사용자)은 'next' 주차를 편집 불가로 보여야 하므로
               // 렌더링 전 실제 표시할 weekState를 결정한다.
               const effectiveWeekState =
                 !isLeader && w.weekState === 'next' ? ('current' as WeekState) : w.weekState;
+              const isLast = idx === weeks.length - 1;
 
-              // locked이면 LockPlanItem 형태로 노출 (days는 숨김)
+              // locked이면 LockPlanItem 형태로 노출
               if (w.weekState === 'locked') {
                 return (
                   <div key={w.id} className="space-y-2">
                     <LockPlanItem label={w.title} />
-                    <p className="text-xs text-gray-07 px-1">
-                      {w.id === 4
-                        ? '3주차 시작 7일 전부터 확인 및 수정이 가능합니다.'
-                        : '잠금된 주차입니다.'}
-                    </p>
+
                     {/* days 숨김: 잠금 상태에서는 항목을 보여주지 않음 */}
+                    {!isLast && <Divider />}
                   </div>
                 );
               }
 
               // 그 외(confirmed/current/next)는 토글 카드로 렌더
               return (
-                <PlanToggleCard key={w.id} title={w.title} defaultOpen={w.id === 1}>
-                  <ul className="space-y-2">
-                    {w.days.map((title, idx) => (
-                      <DayPlanItem
-                        key={idx}
-                        day={idx + 1}
-                        title={title}
-                        variant={mapVariant(effectiveWeekState)}
-                      />
-                    ))}
-                  </ul>
+                <div key={w.id} className="space-y-2">
+                  <PlanToggleCard title={w.title} defaultOpen={w.id === 1}>
+                    <ul className="space-y-2">
+                      {w.days.map((title, idx) => (
+                        <DayPlanItem
+                          key={idx}
+                          day={idx + 1}
+                          title={title}
+                          variant={mapVariant(effectiveWeekState)}
+                        />
+                      ))}
+                    </ul>
 
-                  {/* 수정 완료 버튼: 실제 표시되는 상태(effectiveWeekState)가 'next'인 경우에만, + 파티장일 때만 노출 */}
-                  {effectiveWeekState === 'next' && isLeader && (
-                    <div className="mt-3 flex justify-end">
-                      <Button variant="basic" onClick={() => handleConfirm(w.id)}>
-                        수정 완료
-                      </Button>
-                    </div>
-                  )}
-                </PlanToggleCard>
+                    {/* 수정 완료 버튼: 실제 표시되는 상태(effectiveWeekState)가 'next'인 경우에만, + 파티장일 때만 노출 */}
+                    {effectiveWeekState === 'next' && isLeader && (
+                      <div className="mt-3 flex justify-end">
+                        <Button variant="basic" fullWidth onClick={() => handleConfirm(w.id)}>
+                          수정 완료
+                        </Button>
+                      </div>
+                    )}
+                  </PlanToggleCard>
+                  {!isLast && <Divider />}
+                </div>
               );
             })}
           </div>
