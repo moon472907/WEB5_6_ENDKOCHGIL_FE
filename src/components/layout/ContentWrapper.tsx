@@ -24,7 +24,7 @@ export default function ContentWrapper({
 
   return (
     <main
-      className={tw('flex-1', paddingClass, withNav && 'pb-[calc(65px+16px)]', className)}
+      className={tw('flex flex-col flex-1', paddingClass, withNav && 'pb-[calc(65px+16px)]', className)}
     >
       {children}
     </main>

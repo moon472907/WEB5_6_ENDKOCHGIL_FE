@@ -13,14 +13,14 @@ type Member = {
 
 export default function PartyDetailClient({ partyId }: { partyId: string }) {
   const [members] = useState<Member[]>([
-    { id: 1, name: '이성균', subtitle: '무작위 충격전의 신', crowned: true },
-    { id: 2, name: '김태온', subtitle: '무작위 충격전의 신' },
+    { id: 1, name: '이성균', subtitle: '무작위 총력전의 신', crowned: true },
+    { id: 2, name: '김태은', subtitle: '무작위 총력전의 신' },
     { id: 3, name: '성창식', subtitle: '일반겜 신' },
     { id: 4, name: '범쌤', subtitle: '그냥' }
   ]);
   const [messages, setMessages] = useState([
     { id: 'm1', author: '성창식', text: '안녕하세요 \\(^o^)/' },
-    { id: 'm2', author: '김태온', text: '안녕못해요' },
+    { id: 'm2', author: '김태은', text: '안녕못해요' },
     { id: 'm3', author: '이성균', text: '메이플 하고싶다' },
     { id: 'm4', author: '이성균', text: '칼바람 하고싶다' },
     { id: 'm5', author: '박철현', text: '핑크빈 귀여워' }
