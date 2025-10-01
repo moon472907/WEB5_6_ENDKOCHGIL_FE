@@ -48,7 +48,7 @@ export default function CustomSelect({
         <ul
           role="listbox"
           tabIndex={-1}
-          className="absolute z-50 mt-2 min-w-[150px] bg-basic-white rounded-lg shadow-lg border border-border-input overflow-hidden"
+          className="absolute z-50 mt-2 min-w-30 bg-basic-white rounded-lg shadow-lg border border-border-input overflow-hidden"
         >
           {options.map(opt => (
             <li key={opt.value}>
