@@ -44,7 +44,7 @@ export default function CustomSelectBox({
             <li
               key={option.value}
               className={`cursor-pointer px-3 py-2 text-sm has-hover:bg-bg-main active:bg-bg-main rounded-lg ${
-                option.value === value ? 'bg-bg-main font-medium' : ''
+                option.value === value ? 'bg-bg-main' : ''
               }`}
               onClick={() => {
                 onChange(option.value);

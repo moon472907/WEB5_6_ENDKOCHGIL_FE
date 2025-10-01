@@ -78,7 +78,6 @@ export default function PartyCard({
             <Button
               variant="basic"
               size="md"
-              className="rounded-full"
               onClick={() => setOpenConfirm(true)}
             >
               참여하기

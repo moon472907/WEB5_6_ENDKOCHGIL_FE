@@ -87,7 +87,6 @@ export default function Page() {
             <Button
               variant={tab === 'ongoing' ? 'basic' : 'unselected'}
               size="md"
-              className="rounded-full"
               fullWidth
               onClick={() => setTab('ongoing')}
             >
@@ -96,7 +95,6 @@ export default function Page() {
             <Button
               variant={tab === 'done' ? 'basic' : 'unselected'}
               size="md"
-              className="rounded-full"
               fullWidth
               onClick={() => setTab('done')}
             >
