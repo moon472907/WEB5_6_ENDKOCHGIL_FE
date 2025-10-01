@@ -4,17 +4,20 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { MdKeyboardArrowDown } from 'react-icons/md';
 import ToggleContent from './ToggleContent';
+import { tw } from '@/lib/tw';
 
 interface Props {
   title: string;
   children: React.ReactNode;
   defaultOpen?: boolean;
+  className?: string;
 }
 
 export default function PlanToggleCard({
   title,
   children,
-  defaultOpen = false
+  defaultOpen = false,
+  className = ''
 }: Props) {
   const [open, setOpen] = useState(defaultOpen);
 
@@ -37,7 +40,7 @@ export default function PlanToggleCard({
 
       {/* 토글 영역 */}
       <ToggleContent open={open}>
-        <div className="pb-3">{children}</div>
+        <div className={tw('pb-3', className)}>{children}</div>
       </ToggleContent>
     </div>
   );
