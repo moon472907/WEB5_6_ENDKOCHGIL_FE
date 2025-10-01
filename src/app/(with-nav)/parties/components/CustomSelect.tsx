@@ -34,7 +34,7 @@ export default function CustomSelect({
       <button
         type="button"
         onClick={() => setOpen(s => !s)}
-        className="flex items-center justify-between min-w-[120px] h-10 px-3 py-2 rounded-lg bg-basic-white border border-border-input shadow-sm text-sm cursor-pointer hover:border-gray-04"
+        className="flex items-center justify-between min-w-[120px] h-10 px-3 py-2 rounded-lg bg-basic-white border border-border-card-disabled text-sm cursor-pointer hover:border-gray-04"
         aria-haspopup="listbox"
         aria-expanded={open}
       >
@@ -48,7 +48,7 @@ export default function CustomSelect({
         <ul
           role="listbox"
           tabIndex={-1}
-          className="absolute z-50 mt-2 min-w-30 bg-basic-white rounded-lg shadow-lg border border-border-input overflow-hidden"
+          className="absolute z-50 mt-2 min-w-30 bg-basic-white rounded-lg shadow-lg border border-border-card-disabled overflow-hidden"
         >
           {options.map(opt => (
             <li key={opt.value}>

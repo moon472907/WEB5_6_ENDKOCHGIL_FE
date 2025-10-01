@@ -77,13 +77,13 @@ export default function PartyList() {
   });
 
   return (
-    <div className="space-y-4">
-      <div className="rounded-xl bg-bg-card-default p-4 shadow-sm">
+    <div>
+      <div className="rounded-xl bg-bg-card-default p-4 shadow-sm mb-2">
         <input
           suppressHydrationWarning
           value={query}
           onChange={e => setQuery(e.target.value)}
-          className="w-full rounded-lg border border-border-input px-3 py-2 mb-3 bg-basic-white focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-sub"
+          className="w-full rounded-lg border border-border-card-disabled px-3 py-2 mb-3 bg-basic-white focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-sub"
           placeholder="무엇을 함께 하실래요?"
           // 모바일의 기본 탭 하이라이트 제거 (WebKit)
           style={{ WebkitTapHighlightColor: 'transparent' }}
@@ -123,7 +123,7 @@ export default function PartyList() {
 
       {/* 카테고리 필터가 적용된 경우 HOT 섹션 숨김 */}
       {category === '' && (
-        <>
+        <div className="mt-6 mb-6">
           <h3 className="text-lg font-semibold text-basic-black">
             이번 주 HOT 모집 🔥
           </h3>
@@ -137,22 +137,25 @@ export default function PartyList() {
               endAt: p.endAt
             }))}
           />
-        </>
+        </div>
       )}
 
-      {/* 나머지는 기존 카드로 렌더 */}
-      {visible.map(p => (
-        <PartyCard
-          key={p.id}
-          id={p.id}
-          category={p.category}
-          isPublic={p.isPublic}
-          title={p.name}
-          startAt={p.startAt}
-          endAt={p.endAt}
-          people={`${p.currentMembers}/${p.maxMembers}`}
-        />
-      ))}
+      {/* 나머지는 기존 카드로 렌더 (각 카드별로 아래 여백 적용) */}
+      <div>
+        {visible.map(p => (
+          <div key={p.id} className="mb-4">
+            <PartyCard
+              id={p.id}
+              category={p.category}
+              isPublic={p.isPublic}
+              title={p.name}
+              startAt={p.startAt}
+              endAt={p.endAt}
+              people={`${p.currentMembers}/${p.maxMembers}`}
+            />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

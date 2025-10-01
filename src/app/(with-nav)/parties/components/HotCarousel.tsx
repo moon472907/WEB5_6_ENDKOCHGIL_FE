@@ -51,10 +51,10 @@ export default function HotCarousel({ items }: { items: Item[] }) {
       >
         {slides.map((group, idx) => (
           <SwiperSlide key={idx}>
-            <div className="flex gap-3">
+            <div className="flex gap-3 py-2">
               {group.map(it => (
                 <div key={it.id} className="flex-1">
-                  <div className="rounded-xl bg-bg-card-default p-4 h-28 flex flex-col justify-between shadow-lg">
+                  <div className="rounded-xl bg-bg-card-default p-4 h-28 flex flex-col justify-between shadow-md">
                     <div className="flex items-start justify-between gap-3">
                       <Tag
                         variant={(it.category as TagVariant) ?? 'etc'}
