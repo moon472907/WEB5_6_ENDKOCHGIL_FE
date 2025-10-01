@@ -57,6 +57,15 @@
   --color-button-hover: #AF8B67;
 }
 
+/* === 커스텀 variant 정의 (데스크탑에서만 hover) === */
+@custom-variant has-hover {
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      @slot;
+    }
+  }
+}
+
 /* === 전역 reset/폰트/기본 적용 === */
 @layer base {
   html {

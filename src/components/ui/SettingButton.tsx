@@ -23,8 +23,8 @@ export default function SettingButton({
         ${fullWidth ? "w-full" : "w-auto"}
         ${
           locked
-            ? "bg-bg-disabled hover:bg-[#c4c4c4]"
-            : "bg-button-unselected hover:bg-bg-card-active"
+            ? "bg-bg-disabled has-hover:bg-[#c4c4c4]"
+            : "bg-button-unselected has-hover:bg-bg-card-active"
         }`}
     >
       <span className="flex-1 text-left">{children}</span>
