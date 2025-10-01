@@ -39,7 +39,7 @@ export default function FormSection({
           <p className='text-button-point'>{label}</p>
           {tooltip && (
             <Tooltip message={tooltip} position="top">
-              <MdInfoOutline size={20} className='text-orange-main' />
+              <MdInfoOutline size={20} className='text-orange-main cursor-pointer' />
             </Tooltip>
           )}
         </div>

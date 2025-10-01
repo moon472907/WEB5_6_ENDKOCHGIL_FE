@@ -38,7 +38,7 @@ export default function Tooltip({
   return (
     <div
       ref={ref}
-      className="relative inline-block cursor-pointer"
+      className="relative inline-block"
       onClick={() => setVisible(true)}
     >
       {children}
@@ -50,7 +50,7 @@ export default function Tooltip({
             'max-w-[80vw] break-words',
             'transition-opacity duration-300',
             position === 'top' ? 'bottom-full mb-2' : 'top-full mt-2',
-            visible ? 'opacity-100' : 'opacity-0'
+            visible ? 'opacity-100' : 'opacity-0 pointer-events-none'
           )}
         >
           {message}
