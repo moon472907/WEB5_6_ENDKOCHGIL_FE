@@ -121,8 +121,8 @@ export default function PartyList() {
         </div>
       </div>
 
-      {/* 카테고리 필터가 적용된 경우 HOT 섹션 숨김 */}
-      {category === '' && (
+      {/* 카테고리 필터나 검색이 있을 경우 HOT 섹션 숨김 */}
+      {category === '' && query.trim() === '' && (
         <div className="mt-6 mb-6">
           <h3 className="text-lg font-semibold text-basic-black">
             이번 주 HOT 모집 🔥
