@@ -62,7 +62,7 @@ export default function Page() {
 
   return (
     <>
-      <ContentWrapper withNav className="relative overflow-hidden pb-28 z-0">
+      <ContentWrapper withNav className="relative overflow-hidden pb-40 z-0">
         <div>
           {/* 상단 일러스트 문구 */}
           <div className="flex justify-center gap-3 items-center relative">
@@ -120,7 +120,7 @@ export default function Page() {
           </div>
         </div>
 
-        <div className="fixed bottom-0 right-80 pointer-events-none">
+        <div className="fixed bottom-0 right-2/6 pointer-events-none">
           <Image
             src="/images/sleep.png"
             alt="다람쥐"
