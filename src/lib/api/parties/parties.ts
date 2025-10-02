@@ -25,7 +25,7 @@ export type PartiesPage = {
 
 // 환경변수 기반 base url
 function getBaseUrl(): string {
-  return (process.env.NEXT_PUBLIC_API_BASE_URL_DEV ?? '').replace(/\/$/, '');
+  return (process.env.NEXT_PUBLIC_API_BASE_URL_PROD ?? '').replace(/\/$/, '');
 }
 
 // 안전한 JSON 파싱
