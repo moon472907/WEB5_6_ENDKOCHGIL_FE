@@ -8,7 +8,7 @@ import { MdPersonOutline, MdStars } from "react-icons/md";
 import { mockTitles } from "./titles";
 
 import AlertModal from "@/components/modal/AlertModal";
-import SettingButton from "@/components/ui/SettingButton";
+import SettingButton from "@/app/(with-nav)/settings/components/SettingButton";
 
 export default function Page() {
   const [checked, setChecked] = useState(false); // 토글 상태 관리
