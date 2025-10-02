@@ -34,7 +34,7 @@ export async function getProfile(accessToken: string | undefined) {
   );
 
   console.log("프로필 조회 res", res);
-  
+
   if (!res.ok) throw new Error('프로필 조회 실패');
   return res.json();
 }
