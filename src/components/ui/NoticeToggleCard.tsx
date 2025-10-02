@@ -23,7 +23,7 @@ export default function NoticeToggleCard({
   return (
     <motion.div
       initial={false}
-      className="rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+      className="rounded-xl overflow-hidden shadow-sm has-hover:shadow-md active:shadow-md transition-shadow"
     >
       {/* 헤더 영역 */}
       <button

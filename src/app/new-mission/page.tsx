@@ -11,6 +11,8 @@ import FormSection from './components/FormSection';
 import GoalInput from './components/GoalInput';
 import { useRouter } from 'next/navigation';
 import { maxPeopleOptions, maxPeriodOptions } from '@/constants/missionOptions';
+import { MdCalendarMonth, MdGroup, MdLockOutline } from 'react-icons/md';
+import { TbTarget } from 'react-icons/tb';
 
 function Page() {
   const [goal, setGoal] = useState('');
@@ -42,7 +44,7 @@ function Page() {
           className="flex flex-col flex-1 gap-5 text-stone-800 font-semibold h-full"
         >
           <FormSection
-            icon="/images/target.png"
+            icon={<TbTarget size={20} className='text-button-point' />}
             alt="목표 설정"
             label="목표 설정"
           >
@@ -50,7 +52,7 @@ function Page() {
           </FormSection>
 
           <FormSection
-            icon="/images/person.png"
+            icon={<MdGroup  size={20} className='text-button-point' />}
             alt="최대 참여 인원"
             label="최대 참여 인원"
           >
@@ -63,7 +65,7 @@ function Page() {
           </FormSection>
 
           <FormSection
-            icon="/images/calender.png"
+            icon={<MdCalendarMonth size={20} className='text-button-point' />}
             alt="기간"
             label="기간"
             tooltip="기간은 1주일 단위로 설정할 수 있습니다"
@@ -79,7 +81,7 @@ function Page() {
           <section className="flex flex-col gap-5 mt-auto mb-10">
             <div className="flex items-center justify-between">
               <FormSection
-                icon="/images/lock.png"
+                icon={<MdLockOutline size={20} className='text-button-point' />}
                 alt="공개 여부"
                 label="공개 여부"
                 tooltip={

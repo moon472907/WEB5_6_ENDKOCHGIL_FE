@@ -1,4 +1,7 @@
-import React from 'react';
+'use client'
+
+import { tw } from '@/lib/tw';
+import React, { useEffect, useState } from 'react';
 
 type Props = {
   current: number;
@@ -23,8 +26,22 @@ export default function ExperienceBar({
   const tooltipText =
     formatTooltip?.(safeCurrent, safeMax, pct) ?? `${safeCurrent} / ${safeMax} (${pct}%)`;
 
+  const [tooltipOpen, setTooltipOpen] = useState(false); // 모바일 표시 상태 관리
+  useEffect(() => { // 2초 후 자동 닫힘
+    if (tooltipOpen) {
+      const t = setTimeout(() => setTooltipOpen(false), 2000);
+      return () => clearTimeout(t);
+    }
+  }, [tooltipOpen]);
+
+  const [isTouchDevice, setIsTouchDevice] = useState(false); // 모바일 감지 상태
+  useEffect(() => {
+    const mql = window.matchMedia('(hover: none), (pointer: coarse)');
+    setIsTouchDevice(mql.matches);
+  }, []);
+
   return (
-    <div className={`relative w-full ${className} group`} aria-hidden={false}>
+    <div className={`relative w-full ${className}`} aria-hidden={false} onClick={isTouchDevice ? () => setTooltipOpen(true) : undefined}>
       {/* 바 배경 */}
       <div
         className="w-full rounded-full bg-[var(--color-button-point)] overflow-hidden"
@@ -41,9 +58,14 @@ export default function ExperienceBar({
         />
       </div>
 
-      {/* 툴팁: 호버 시 보임 (데스크탑) */}
+      {/* 툴팁: 호버 시 보임 (데스크탑), 클릭 시 보임 (모바일) */}
       <div
-        className="pointer-events-none absolute left-1/2 -translate-x-1/2 -bottom-8 rounded-md bg-[var(--color-basic-white)] text-[var(--color-basic-black)] text-xs px-2 py-1 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity duration-150"
+        className={tw(
+          'pointer-events-none absolute left-1/2 -translate-x-1/2 -bottom-8 rounded-md',
+          'bg-[var(--color-basic-white)] text-[var(--color-basic-black)] text-xs px-2 py-1 shadow-sm',
+          'transition-opacity duration-300',
+          tooltipOpen ? 'opacity-100' : 'opacity-0 group-has-hover:opacity-100'
+        )}
         style={{ whiteSpace: 'nowrap' }}
         aria-hidden="true"
       >
