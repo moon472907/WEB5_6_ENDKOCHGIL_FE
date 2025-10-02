@@ -37,6 +37,11 @@ function safeJsonParse<T = unknown>(text: string): T | null {
   }
 }
 
+// API 응답 타입
+type PartiesApiResponse =
+  | { content: PartiesPage } // Page 형태
+  | { content: PartyApiItem[] }; // 단순 배열 형태
+
 /**
  * 클라이언트에서 파티 목록 조회
  */
@@ -52,7 +57,7 @@ export async function fetchPartiesClient(
 ): Promise<{
   list: PartyApiItem[];
   pageMeta: PartiesPage | null;
-  raw: unknown;
+  raw: PartiesApiResponse;
 }> {
   // 쿼리스트링 만들기
   const qs = new URLSearchParams();
@@ -85,16 +90,17 @@ export async function fetchPartiesClient(
 
   // JSON 파싱
   const parsed = res.headers.get('content-type')?.includes('application/json')
-    ? safeJsonParse<unknown>(text)
+    ? safeJsonParse<PartiesApiResponse>(text)
     : null;
-  const raw = parsed ?? {};
+
+  const raw: PartiesApiResponse = parsed ?? { content: [] };
 
   // 리스트 추출
-  const list =
-    ((raw as unknown)?.content?.content as PartyApiItem[] | undefined) ??
-    ((raw as unknown)?.content as PartyApiItem[] | undefined) ??
-    ([] as PartyApiItem[]);
-  const pageMeta = ((raw as unknown)?.content as PartiesPage | undefined) ?? null;
+  const list = Array.isArray(raw.content)
+    ? (raw.content as PartyApiItem[])
+    : raw.content.content;
+
+  const pageMeta = Array.isArray(raw.content) ? null : raw.content;
 
   return { list, pageMeta, raw };
 }
@@ -113,7 +119,7 @@ export async function fetchPartiesServer(
 ): Promise<{
   list: PartyApiItem[];
   pageMeta: PartiesPage | null;
-  raw: unknown;
+  raw: PartiesApiResponse;
 }> {
   return fetchPartiesClient(params);
 }
