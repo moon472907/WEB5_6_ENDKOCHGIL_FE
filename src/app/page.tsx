@@ -1,16 +1,24 @@
 import Nav from '@/components/nav/Nav';
-import MissionCard from './components/main/MissionCard';
+import MissionCard from './main/components/MissionCard';
 import Coin from '@/components/ui/Coin';
 import { formatToday } from '@/utils/date';
 import ExperienceBar from '@/components/ui/ExperienceBar';
 import Image from 'next/image';
 import Link from 'next/link';
-import NewMissionButton from './components/main/NewMissionButton';
+import NewMissionButton from './main/components/NewMissionButton';
+import { getTodayTask } from '@/lib/api/task';
+import { Task } from './main/types/task';
+import { cookies } from 'next/headers';
+import EmptyMissionCard from './main/components/EmptyMissionCard';
 
-export default function Home() {
+export default async function Home() {
+  const cookieStore = cookies();
+  const accessToken = (await cookieStore).get('accessToken')?.value;
+  const tasks = await getTodayTask(accessToken);
+  const completedCount = tasks.filter(t => t.status === 'COMPLETED').length;
+
   return (
     <div className="flex flex-col min-h-dvh pb-20">
-      
       <section className="flex flex-col bg-basic-white py-4 px-5 gap-2 h-[180px]">
         <div className="flex items-center justify-between gap-5 ">
           <div className="flex bg-bg-main py-1.5 px-4 gap-2 rounded-xl w-full shadow-md group">
@@ -54,8 +62,8 @@ export default function Home() {
         </Link>
       </section>
 
-      <section className="flex flex-col gap-2 px-7 py-4 relative flex-1">
-        <div className="flex flex-col gap-9 px-2">
+      <section className="flex flex-col gap-3 px-7 py-5 relative flex-1">
+        <div className="flex flex-col gap-8 px-2">
           <h2 className="text-lg font-semibold text-button-point">
             {formatToday()}
           </h2>
@@ -63,12 +71,19 @@ export default function Home() {
             <span className="text-lg font-semibold text-button-point">
               오늘의 미션
             </span>
-            <span className="text-lg font-semibold text-text-sub">1/2</span>
+            <span className="text-lg font-semibold text-text-sub">
+              {completedCount}/{tasks.length}
+            </span>
           </div>
         </div>
         <div className="flex flex-col gap-4">
-          <MissionCard />
-          <MissionCard />
+          {tasks.length > 0 ? (
+            tasks.map((task: Task) => (
+              <MissionCard key={task.taskId} task={task} />
+            ))
+          ) : (
+            <EmptyMissionCard />
+          )}
         </div>
         <NewMissionButton />
       </section>
