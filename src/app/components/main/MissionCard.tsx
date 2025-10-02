@@ -1,5 +1,5 @@
-import Image from 'next/image';
 import CheckboxWrapper from './CheckboxWrapper';
+import { MdPerson } from 'react-icons/md';
 
 export default function MissionCard() {
   return (
@@ -7,7 +7,7 @@ export default function MissionCard() {
       <div className="flex flex-col gap-3">
         <p className="font-semibold text-gray-09">한달동안 5키로 감량하기</p>
         <div className="flex gap-1">
-          <Image src="/images/person.svg" alt="사람" width={20} height={20} />
+          <MdPerson size={20} className='text-[#434343]' />
           <p className="text-sm font-medium text-gray-04">1명 참가중</p>
         </div>
       </div>

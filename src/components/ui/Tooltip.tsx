@@ -42,19 +42,19 @@ export default function Tooltip({
       onClick={() => setVisible(true)}
     >
       {children}
-      {visible && (
         <div
           className={tw(
             'absolute -translate-x-2 whitespace-nowrap',
             'rounded-xl bg-basic-white text-button-point text-sm font-semibold p-3',
             'shadow-[0_4px_4px_rgba(0,0,0,0.25)]',
             'max-w-[80vw] break-words',
-            position === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'
+            'transition-opacity duration-300',
+            position === 'top' ? 'bottom-full mb-2' : 'top-full mt-2',
+            visible ? 'opacity-100' : 'opacity-0 pointer-events-none'
           )}
         >
           {message}
         </div>
-      )}
     </div>
   );
 }
