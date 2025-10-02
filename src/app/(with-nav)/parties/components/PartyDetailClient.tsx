@@ -129,12 +129,7 @@ export default function PartyDetailClient({ partyId }: { partyId: string }) {
                 if (e.key === 'Enter') handleSend();
               }}
             />
-            <button
-              className="ml-2 px-4 py-2 rounded-md bg-brown-600 text-white"
-              onClick={handleSend}
-            >
-              전송
-            </button>
+            <button onClick={handleSend} > </button>
           </div>
         </div>
       </div>
