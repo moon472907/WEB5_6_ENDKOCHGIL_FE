@@ -130,8 +130,8 @@ export default function PartyList() {
               id: p.id,
               name: p.name,
               category: mapTag(p.category),
-              startAt: (p.startDate ?? p.startAt ?? '') as string,
-              endAt: (p.endDate ?? p.endAt ?? '') as string
+              startAt: (p.startDate ?? '') as string,
+              endAt: (p.endDate ?? '') as string
             }))}
           />
         </div>
@@ -145,8 +145,8 @@ export default function PartyList() {
               category={mapTag(p.category)}
               isPublic={!!p.isPublic}
               title={p.name}
-              startAt={(p.startDate ?? p.startAt ?? '') as string}
-              endAt={(p.endDate ?? p.endAt ?? '') as string}
+              startAt={(p.startDate ?? '') as string}
+              endAt={(p.endDate ?? '') as string}
               people={`${p.currentMembers ?? 0}/${p.maxMembers ?? 0}`}
             />
           </div>
