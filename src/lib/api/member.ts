@@ -39,6 +39,7 @@ export async function getProfile(accessToken: string | undefined) {
   return res.json();
 }
 
+
 // 회원 정보 확인
 export async function getMyInfo(accessToken: string | undefined) {
   try {
@@ -62,6 +63,59 @@ export async function getMyInfo(accessToken: string | undefined) {
   } catch (error) {
     console.error('내 정보 조회 중 에러:', error)
     return null;
+  }
+}
 
+
+// 로그아웃
+export async function logout() {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL_PROD}/api/v1/members/logout`,
+      {
+        method: 'DELETE',
+        credentials: 'include',
+        cache: 'no-store',
+      }
+    );
+
+    if (!res.ok) {
+      console.warn('로그아웃 실패:', res.status);
+      return false;
+    }
+
+    const data = await res.json();
+    console.log('로그아웃 성공:', data);
+    return true;
+  } catch (error) {
+    console.error('로그아웃 요청 중 에러:', error);
+    return false;
+  }
+}
+
+
+// 회원 탈퇴
+export async function unregister() {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL_PROD}/api/v1/members/delete`,
+      {
+        method: 'DELETE',
+        credentials: 'include',
+        cache: 'no-store',
+      }
+    );
+
+    if (!res.ok) {
+      console.warn('회원 탈퇴 실패:', res.status);
+      return false;
+    }
+
+    const data = await res.json();
+    console.log('회원 탈퇴 성공:', data);
+    return true;
+  } catch (error) {
+    console.error('회원 탈퇴 요청 중 에러:', error);
+    return false;
   }
 }
