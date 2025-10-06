@@ -41,17 +41,27 @@ export async function getProfile(accessToken: string | undefined) {
 
 // 회원 정보 확인
 export async function getMyInfo(accessToken: string | undefined) {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE_URL_PROD}/api/v1/members/me`,
-    {
-      method: 'GET',
-      headers: {
-        Cookie: `accessToken=${accessToken}`,
-      },
-      cache: 'no-store',
-    }
-  );
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL_PROD}/api/v1/members/me`,
+      {
+        method: 'GET',
+        headers: {
+          Cookie: `accessToken=${accessToken}`,
+        },
+        cache: 'no-store',
+      }
+    );
 
-  if (!res.ok) throw new Error(`내 정보 조회 실패`);
-  return res.json();
+    if (!res.ok) {
+      console.warn('내 정보 조회 실패:', res.status);
+      return null;
+    }
+
+    return res.json();
+  } catch (error) {
+    console.error('내 정보 조회 중 에러:', error)
+    return null;
+
+  }
 }
