@@ -8,6 +8,14 @@ export const formatBirthDate = (year: string, month: string, day: string): strin
 };
 
 /**
+ * 오늘 날짜를 YYYY-MM-DD 형태로 반환
+ */
+export function getTodayString() {
+  const today = new Date().toISOString().split('T')[0];
+  return today;
+}
+
+/**
  * 전달받은 날짜를 "M월 DD일 요일" 형태로 변환
  */
 export const formatToday = (date?: Date): string => {

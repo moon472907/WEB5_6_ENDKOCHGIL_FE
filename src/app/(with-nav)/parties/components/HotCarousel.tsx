@@ -8,6 +8,8 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 
+import { mapTag, variantToKorean } from '@/lib/tag';
+
 type Item = {
   id: number;
   name: string;
@@ -16,24 +18,15 @@ type Item = {
   endAt?: string;
 };
 
-// 백엔드 variant 키를 그대로 쓰는 경우 바로 전달
-function mapLabel(cat?: string) {
-  if (!cat) return '기타';
-  const s = cat.toLowerCase();
-  if (s.includes('care')) return '멘탈 케어';
-  if (s.includes('habit')) return '생활 습관';
-  if (s.includes('study')) return '학습';
-  if (s.includes('exercise') || s.includes('activity') || s.includes('exer')) return '운동';
-  return '기타';
-}
-
 export default function HotCarousel({ items }: { items: Item[] }) {
   if (!items || items.length === 0) return null;
 
   // 한 슬라이드에 2개씩 보여주기: 슬라이드 내부에 2개 카드 배치
   const itemsPerSlide = 2;
   const slides: Item[][] = [];
-  for (let i = 0; i < items.length; i += itemsPerSlide) slides.push(items.slice(i, i + itemsPerSlide));
+  for (let i = 0; i < items.length; i += itemsPerSlide) {
+    slides.push(items.slice(i, i + itemsPerSlide));
+  }
 
   const enableLoop = slides.length > 1;
 
@@ -52,15 +45,15 @@ export default function HotCarousel({ items }: { items: Item[] }) {
         {slides.map((group, idx) => (
           <SwiperSlide key={idx}>
             <div className="flex gap-3 py-2">
-              {group.map(it => (
+              {group.map((it) => (
                 <div key={it.id} className="flex-1">
                   <div className="rounded-xl bg-bg-card-default p-4 h-28 flex flex-col justify-between shadow-md">
                     <div className="flex items-start justify-between gap-3">
                       <Tag
-                        variant={(it.category as TagVariant) ?? 'etc'}
+                        variant={mapTag(it.category) as TagVariant}
                         size="sm"
                       >
-                        {mapLabel(it.category)}
+                        {variantToKorean(it.category)}
                       </Tag>
                     </div>
                     <h4 className="font-semibold text-base">{it.name}</h4>

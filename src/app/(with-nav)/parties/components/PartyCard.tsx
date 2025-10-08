@@ -6,6 +6,7 @@ import ConfirmModal from '@/components/modal/ConfirmModal';
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { mapTag, variantToKorean } from '@/lib/tag';
+import type { PartyApiItem } from '@/lib/api/parties/parties';
 
 export default function PartyCard({
   category,
@@ -15,7 +16,7 @@ export default function PartyCard({
   people,
   id
 }: {
-  category?: string;
+  category?: PartyApiItem['category'];
   isPublic?: boolean;
   title: string;
   startAt?: string;
@@ -48,7 +49,7 @@ export default function PartyCard({
   const router = useRouter();
 
   return (
-    <article className="rounded-2xl bg-bg-card-default p-4 shadow-md border border-transparent cursor-pointer focus:outline-none">
+    <article className="rounded-2xl bg-bg-card-default p-4 shadow-md border border-transparent focus:outline-none">
       <div className="flex items-start gap-4">
         <div className="flex-1">
           <div className="flex items-center justify-between">

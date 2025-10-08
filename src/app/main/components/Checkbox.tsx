@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FaCheck } from 'react-icons/fa6';
 
 interface CheckboxProps {
@@ -16,10 +16,17 @@ export default function Checkbox({
 }: CheckboxProps) {
   const [checked, setChecked] = useState(defaultChecked);
 
+
+  // 부모에서 defaultChecked가 바뀔 경우에도 반영되도록
+    useEffect(() => {
+    setChecked(defaultChecked);
+  }, [defaultChecked]);
+
+
   const handleChange = () => {
     const next = !checked;
     setChecked(next);
-    onChange?.(next);
+    onChange?.(next); // 부모 콜백 실행
   };
 
   return (
