@@ -1,3 +1,4 @@
+import { BASE_URL, CLIENT_URL } from '@/lib/api/config';
 import Image from 'next/image';
 
 type Provider = '카카오' | '네이버' | '구글';
@@ -25,7 +26,7 @@ function SocialLoginButton({
 
   return (
     <a
-      href={`${process.env.NEXT_PUBLIC_API_BASE_URL_PROD}/oauth2/authorization/${providerMap[provider]}?redirectUrl=${process.env.NEXT_PUBLIC_CLIENT_URL_PROD}/profile`}
+      href={`${BASE_URL}/oauth2/authorization/${providerMap[provider]}?redirectUrl=${CLIENT_URL}/profile`}
       className={`w-full max-w-[328px] h-[48px] flex justify-center gap-3 items-center rounded-lg shadow-[0_4px_4px_rgba(0,0,0,0.25)] cursor-pointer ${className}`}
       aria-label={`${provider}로 로그인`}
       role="button"

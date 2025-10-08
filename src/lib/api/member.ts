@@ -1,10 +1,12 @@
+import { BASE_URL } from '@/lib/api/config';
+
 export async function putProfile(payload: {
   name: string;
   birth: string;
   gender: 'MALE' | 'FEMALE';
 }) {
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE_URL_PROD}/api/v1/members/valid`,
+    `${BASE_URL}/api/v1/members/valid`,
     {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -20,7 +22,7 @@ export async function putProfile(payload: {
 
 export async function getProfile(accessToken: string | undefined) {
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE_URL_PROD}/api/v1/members/valid`,
+    `${BASE_URL}/api/v1/members/valid`,
     // `/api/v1/members/valid`,
     {
       method: 'GET',
@@ -44,7 +46,7 @@ export async function getProfile(accessToken: string | undefined) {
 export async function getMyInfo(accessToken: string | undefined) {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL_PROD}/api/v1/members/me`,
+      `${BASE_URL}/api/v1/members/me`,
       {
         method: 'GET',
         headers: {
@@ -72,7 +74,7 @@ export async function getMyInfo(accessToken: string | undefined) {
 export async function logout() {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL_PROD}/api/v1/members/logout`,
+      `${BASE_URL}/api/v1/members/logout`,
       {
         method: 'DELETE',
         credentials: 'include',
@@ -99,7 +101,7 @@ export async function logout() {
 export async function unregister() {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL_PROD}/api/v1/members/delete`,
+      `${BASE_URL}/api/v1/members/delete`,
       {
         method: 'DELETE',
         credentials: 'include',
