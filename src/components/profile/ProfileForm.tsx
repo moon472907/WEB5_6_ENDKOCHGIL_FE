@@ -7,7 +7,7 @@ import Button from '@/components/ui/Button';
 import GenderSelect from '@/components/ui/GenderSelect';
 import NicknameInput from '@/components/ui/NicknameInput';
 import { genderMap } from '@/constants/gender';
-import { putProfile } from '@/lib/api/member';
+import { putProfile, updateProfile } from '@/lib/api/member';
 import { formatBirthDate } from '@/utils/date';
 import { isValidDay, isValidMonth, isValidYear } from '@/utils/validation';
 import { useRouter } from 'next/navigation';
@@ -41,15 +41,19 @@ export default function ProfileForm({ mode = 'create', initialData }: Props) {
     const birthDate = formatBirthDate(birth.year, birth.month, birth.day);
 
     try {
-      await putProfile({
-        name: nickname,
-        birth: birthDate,
-        gender: genderMap[gender]
-      });
-
       if (mode === 'edit') {
+        await updateProfile({
+          name: nickname,
+          birth: birthDate,
+          gender: genderMap[gender],
+        });
         router.push('/settings');
       } else {
+        await putProfile({
+          name: nickname,
+          birth: birthDate,
+          gender: genderMap[gender],
+        });
         router.push('/');
       }
     } catch (error) {
