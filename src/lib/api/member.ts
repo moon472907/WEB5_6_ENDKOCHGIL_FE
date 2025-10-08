@@ -42,6 +42,24 @@ export async function getProfile(accessToken: string | undefined) {
 }
 
 
+// 프로필 수정
+export async function updateProfile(payload: {
+  name: string;
+  birth: string;
+  gender: 'MALE' | 'FEMALE';
+}) {
+  const res = await fetch(`${BASE_URL}/api/v1/members/modify/profile`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) throw new Error('프로필 수정 실패');
+  return res.json();
+}
+
+
 // 회원 정보 확인
 export async function getMyInfo(accessToken: string | undefined) {
   try {
