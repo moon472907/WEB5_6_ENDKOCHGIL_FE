@@ -6,8 +6,7 @@ export default async function Page() {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get("accessToken")?.value;
 
-  const data = await getMyInfo(accessToken);
-  const content = data?.content;
+  const content = await getMyInfo(accessToken);
 
   const genderValue =
     content?.gender === "MALE"

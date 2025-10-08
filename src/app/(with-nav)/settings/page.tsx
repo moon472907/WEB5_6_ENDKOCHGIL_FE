@@ -11,13 +11,11 @@ export default async function SettingsPage() {
     redirect("/login");
   }
 
-  const data = await getMyInfo(accessToken);
+  const profile = await getMyInfo(accessToken);
 
-  if (!data) {
+  if (!profile) {
     redirect('/login');
   }
-
-  const profile = data.content;
 
   return <SettingsClient profile={profile} />;
 }

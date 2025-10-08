@@ -59,7 +59,8 @@ export async function getMyInfo(accessToken: string | undefined) {
       return null;
     }
 
-    return res.json();
+    const data = await res.json();
+    return data.content;
   } catch (error) {
     console.error('내 정보 조회 중 에러:', error)
     return null;
