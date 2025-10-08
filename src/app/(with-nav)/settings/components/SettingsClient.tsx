@@ -6,6 +6,8 @@ import SettingButton from "@/app/(with-nav)/settings/components/SettingButton";
 import Link from "next/link";
 import { useState } from "react";
 import { MdHelpOutline, MdLogout, MdPersonOutline } from "react-icons/md";
+import { logout, unregister } from "@/lib/api/member";
+import { useRouter } from "next/navigation";
 
 interface Profile {
   title?: string;
@@ -18,8 +20,33 @@ interface Props {
 }
 
 export default function SettingsClient({ profile }: Props) {
+  const router = useRouter();
   const [logoutOpen, setLogoutOpen] = useState(false); // 로그아웃 모달 열림 상태
   const [unregisterOpen, setUnregisterOpen] = useState(false); // 회원탈퇴 모달 열림 상태
+
+  // 로그아웃 핸들러
+  const handleLogout = async () => {
+    const success = await logout();
+    if (success) {
+      alert('로그아웃 되었습니다.');
+      router.push('/login'); // 로그인 페이지로 이동
+    } else {
+      alert('로그아웃에 실패했습니다.');
+    }
+    setLogoutOpen(false); // 모달 닫기
+  };
+
+  // 회원탈퇴 핸들러
+  const handleUnregister = async () => {
+    const success = await unregister();
+    if (success) {
+      alert('회원 탈퇴가 완료되었습니다.');
+      router.push('/login'); // 로그인 페이지로 이동
+    } else {
+      alert('회원 탈퇴에 실패했습니다.');
+    }
+    setUnregisterOpen(false); // 모달 닫기
+  };
 
   return (
     <>
@@ -100,7 +127,7 @@ export default function SettingsClient({ profile }: Props) {
         {/* 로그아웃 */}
         <ConfirmModal
           open={logoutOpen}
-          onConfirm={() => setLogoutOpen(false)}
+          onConfirm={handleLogout}
           onCancel={() => setLogoutOpen(false)}
           variant="sad"
           lines={['로그아웃 하시겠습니까?']}
@@ -109,7 +136,7 @@ export default function SettingsClient({ profile }: Props) {
         {/* 회원탈퇴 */}
         <ConfirmModal
           open={unregisterOpen}
-          onConfirm={() => setUnregisterOpen(false)}
+          onConfirm={handleUnregister}
           onCancel={() => setUnregisterOpen(false)}
           variant="sad"
           lines={['탈퇴 후에는 복구가 어려워요','그래도 진행하시겠습니까?']}

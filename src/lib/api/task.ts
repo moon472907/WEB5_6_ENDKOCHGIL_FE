@@ -1,4 +1,6 @@
 import { Task } from "@/app/main/types/task";
+import { BASE_URL } from "./config";
+import { redirect } from "next/navigation";
 
 interface UpdateTaskCompletionBody {
   taskId: number;
@@ -12,8 +14,13 @@ interface UpdateTaskCompletionBody {
  * @returns 오늘의 태스크 리스트
  */
 export async function getTodayTask(accessToken: string | undefined): Promise<Task[]> {
+  if (!accessToken) {
+    console.warn("accessToken 없음");
+    redirect("/login");
+  }
+
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE_URL_PROD}/api/v1/tasks/today`,
+    `${BASE_URL}/api/v1/tasks/today`,
     {
       method: 'GET',
       cache: 'no-store',
@@ -24,7 +31,11 @@ export async function getTodayTask(accessToken: string | undefined): Promise<Tas
     }
   );
 
-  if (!res.ok) throw new Error('오늘의 테스크 조회 실패');
+  if (!res.ok) {
+    console.warn("오늘의 테스크 조회 실패");
+    redirect("/login");
+  }
+
   const data = await res.json();
   return data.content; 
 }
@@ -34,7 +45,7 @@ export async function getTodayTask(accessToken: string | undefined): Promise<Tas
  * @returns 업데이트된 Task 객체
  */
 export async function updateTaskCompletion(body: UpdateTaskCompletionBody) {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL_PROD}/api/v1/tasks/complete`, {
+  const res = await fetch(`${BASE_URL}/api/v1/tasks/complete`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

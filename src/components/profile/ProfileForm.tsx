@@ -47,7 +47,11 @@ export default function ProfileForm({ mode = 'create', initialData }: Props) {
         gender: genderMap[gender]
       });
 
-      router.push('/');
+      if (mode === 'edit') {
+        router.push('/settings');
+      } else {
+        router.push('/');
+      }
     } catch (error) {
       // TODO : alert? modal? toast?
       console.error('프로필 입력 에러 발생:', error);

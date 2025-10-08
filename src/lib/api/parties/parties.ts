@@ -1,3 +1,5 @@
+import { BASE_URL } from "../config";
+
 // types 정의
 export type PartyApiItem = {
   id: number;
@@ -25,7 +27,7 @@ export type PartiesPage = {
 
 // 환경변수 기반 base url
 function getBaseUrl(): string {
-  return (process.env.NEXT_PUBLIC_API_BASE_URL_PROD ?? '').replace(/\/$/, '');
+  return (BASE_URL ?? '').replace(/\/$/, '');
 }
 
 // 안전한 JSON 파싱
