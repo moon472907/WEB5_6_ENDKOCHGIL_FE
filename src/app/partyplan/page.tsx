@@ -133,6 +133,8 @@ export default function Page() {
                     <ul className="space-y-2">
                       {w.days.map((title, idx) => (
                         <DayPlanItem
+                        taskId={idx}
+                        subGoalId={idx}
                           key={idx}
                           day={idx + 1}
                           title={title}

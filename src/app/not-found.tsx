@@ -42,14 +42,6 @@ export default function NotFound() {
         </div>
       </div>
 
-      {/* <Link
-        href="/"
-        className="w-full max-w-[328px] px-6 py-3 rounded-lg text-basic-white bg-button-selected hover:bg-button-active active:bg-button-active transition-colors"
-      >
-        홈으로 돌아가기
-      </Link> */}
-
-      {/* TODO: button 컴포넌트 수정 완료 후, 리팩토링 예정 */}
       <Link href="/" className="block w-full max-w-[328px]">
         <Button variant="basic" size="lg" fullWidth>
           홈으로 돌아가기

@@ -4,14 +4,14 @@ import { useState } from 'react';
 import { FiChevronDown } from 'react-icons/fi';
 
 interface Option {
-  value: string;
+  value: number;
   label: string;
 }
 
 interface CustomSelectBoxProps {
   options: Option[];
-  value: string | null;
-  onChange: (value: string) => void;
+  value: number | null;
+  onChange: (value: number) => void;
   placeholder?: string;
 }
 

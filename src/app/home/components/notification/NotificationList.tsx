@@ -1,0 +1,79 @@
+'use client';
+
+import { useRef, useState, useEffect } from 'react';
+import Image from 'next/image';
+import NotificationItem from './NotificationItem';
+import { useNotifications } from './useNotifications';
+
+interface NotificationListProps {
+  accessToken?: string;
+}
+
+// 알림 전체 목록 + 드롭다운
+export default function NotificationList({
+  accessToken
+}: NotificationListProps) {
+  const { notifications, hasUnread, handleRead, handleDelete } =
+    useNotifications(accessToken);
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    }
+    if (isOpen) document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen]);
+
+  return (
+    <div className="relative" ref={containerRef}>
+      {/* 종 아이콘 */}
+      <button
+        className="relative"
+        onClick={() => setIsOpen(prev => !prev)}
+        aria-label="알림 보기"
+      >
+        <Image
+          src="/images/bell.svg"
+          alt="알림"
+          width={30}
+          height={30}
+          className="cursor-pointer"
+        />
+        {hasUnread && (
+          <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full" />
+        )}
+      </button>
+
+      {/* 드롭다운 */}
+      <div
+        className={`absolute top-[45px] right-0 w-[280px] bg-basic-white shadow-lg rounded-lg border border-gray-200 p-3 pb-0 z-50
+          ${isOpen ? 'block' : 'hidden'}`}
+      >
+        <h3 className="font-semibold mb-2 text-sm text-gray-700">알림 목록</h3>
+        {notifications.length > 0 ? (
+          <ul className="scrollbar-v2 flex flex-col gap-2 max-h-[240px] overflow-y-auto pb-7 overflow-x-visible overflow-visible">
+            {notifications.map(n => (
+              <NotificationItem
+                key={n.id}
+                notification={n}
+                onRead={() => handleRead(n.id)}
+                onDelete={() => handleDelete(n.id)}
+              />
+            ))}
+          </ul>
+        ) : (
+          <p className="text-xs text-gray-400 text-center py-4">
+            알림이 없습니다
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}

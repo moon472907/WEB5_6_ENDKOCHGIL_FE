@@ -61,7 +61,7 @@ export async function updateProfile(payload: {
 
 
 // 회원 정보 확인
-export async function getMyInfo(accessToken: string | undefined) {
+export async function getMyInfo(accessToken?: string | undefined) {
   try {
     const url = `${BASE_URL}/api/v1/members/me`;
     let res: Response;

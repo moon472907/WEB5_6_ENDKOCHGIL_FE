@@ -7,9 +7,10 @@ import { MdKeyboardArrowLeft } from "react-icons/md";
 type Props = {
   title?: string;
   bgColor?: 'main'|'white';
+  backTo?: string;
 };
 
-function Header({ title, bgColor = 'main' }: Props) {
+function Header({ title, bgColor = 'main', backTo }: Props) {
   const router = useRouter();
 
   return (
@@ -18,7 +19,13 @@ function Header({ title, bgColor = 'main' }: Props) {
         <button
           type="button"
           aria-label="뒤로가기"
-          onClick={() => router.back()}
+          onClick={() => {
+            if (backTo) {
+              router.push(backTo);
+            } else {
+              router.back();
+            }
+          }}
           className="absolute left-2 p-2 cursor-pointer text-basic-black"
         >
           <MdKeyboardArrowLeft size={28}/>
