@@ -61,12 +61,13 @@ export async function updateProfile(payload: {
 
 
 // 회원 정보 확인
-export async function getMyInfo(accessToken: string | undefined) {
+export async function getMyInfo(accessToken?: string | undefined) {
   try {
     const res = await fetch(
       `${BASE_URL}/api/v1/members/me`,
       {
         method: 'GET',
+        credentials: 'include',
         headers: {
           Cookie: `accessToken=${accessToken}`,
         },
