@@ -1,88 +1,35 @@
-'use client'
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { getAllTitles, getMyTitles } from "@/lib/api/title";
+import { getMyInfo } from "@/lib/api/member";
+import TitleClient from "./components/TitleClient";
 
-import ContentWrapper from "@/components/layout/ContentWrapper";
-import Header from "@/components/layout/Header";
-import Toggle from "@/components/ui/Toggle";
-import { useState } from "react";
-import { MdPersonOutline, MdStars } from "react-icons/md";
-import { mockTitles } from "./titles";
+export default async function TitlePage() {
+  try {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get("accessToken")?.value;
 
-import AlertModal from "@/components/modal/AlertModal";
-import SettingButton from "@/app/(with-nav)/settings/components/SettingButton";
+    if (!accessToken) redirect("/login");
 
-export default function Page() {
-  const [checked, setChecked] = useState(false); // 토글 상태 관리
-  const [alertOpen, setAlertOpen] = useState(false); // 모달 상태 관리
-  const [selectedTitle, setSelectedTitle] = useState<typeof mockTitles[0] | null>(null); // 칭호 상태 관리
+    const profile = await getMyInfo(accessToken);
+    const allTitles = await getAllTitles(accessToken);
+    const myTitleIds = await getMyTitles(accessToken);
 
-  return (
-    <>
-      <Header title="칭호 수정" />
-      <ContentWrapper withNav padding="xl">
+    // 보유 여부 추가
+    const mergedTitles = allTitles.map((title) => ({
+      ...title,
+      locked: !myTitleIds.includes(title.id),
+    }));
 
-        {/* 현재 칭호 영역 */}
-        <div className="mb-6">
-          <div className="flex items-center gap-1 mb-2">
-            <MdPersonOutline size={20} className="text-button-point" />
-            <span className="text-base font-semibold text-button-point">현재 칭호</span>
-          </div>
-          <div className="flex flex-col gap-2.5">
-            <SettingButton>
-              무작위 총력전의 신
-            </SettingButton>
-          </div>
-        </div>
-
-        {/* 칭호 영역 */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-1">
-              <MdStars size={20} className="text-button-point" />
-              <span className="text-base font-semibold text-button-point">칭호</span>
-            </div>
-            <Toggle
-              checked={checked}
-              onChange={setChecked}
-              leftLabel="전체 보기"
-            />
-          </div>
-
-          {/* 칭호 (목 데이터) */}
-          <div className="flex flex-col gap-2.5">
-            {(checked ? mockTitles : mockTitles.filter((t) => !t.locked)).map(
-              (title) => (
-                <SettingButton
-                  key={title.id}
-                  locked={title.locked}
-                  onClick={()=>{setSelectedTitle(title)
-                  setAlertOpen(true)
-                  }}
-                >
-                  {title.name}
-                </SettingButton>
-              )
-            )}
-          </div>
-        </div>
-
-        {/* 모달 영역 */}
-        {selectedTitle && (
-          <AlertModal
-            open={alertOpen}
-            onConfirm={()=> {
-              // console.log("적용 버튼 눌림")
-              setAlertOpen(false)
-            }}
-            title={selectedTitle.name}
-            description={`획득 조건: ${selectedTitle.condition}`}
-            detail={selectedTitle.description}
-            disabled={selectedTitle.locked}
-            disabledMessage="이 칭호를 획득해야 적용할 수 있습니다"
-          />
-        )}
-
-
-      </ContentWrapper>
-    </>
-  );
+    return (
+      <TitleClient
+        currentTitle={profile.title}
+        allTitles={mergedTitles}
+        accessToken={accessToken}
+      />
+    );
+  } catch (err) {
+     console.error("칭호 페이지 로드 중 오류 발생:", err);
+     redirect("/login");
+  }
 }
