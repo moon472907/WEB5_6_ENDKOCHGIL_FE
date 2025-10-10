@@ -3,6 +3,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Button from '@/components/ui/Button';
 import Image from 'next/image';
+import { fetchPartyDetailClient } from '@/lib/api/parties/parties';
+import { getMyInfo } from '@/lib/api/member';
 
 type Member = {
   id: number;
@@ -12,12 +14,7 @@ type Member = {
 };
 
 export default function PartyDetailClient({ partyId }: { partyId: string }) {
-  const [members] = useState<Member[]>([
-    { id: 1, name: '이성균', subtitle: '무작위 총력전의 신', crowned: true },
-    { id: 2, name: '김태은', subtitle: '무작위 총력전의 신' },
-    { id: 3, name: '성창식', subtitle: '일반겜 신' },
-    { id: 4, name: '범쌤', subtitle: '그냥' }
-  ]);
+  const [members, setMembers] = useState<Member[]>([]);
   const [messages, setMessages] = useState([
     { id: 'm1', author: '성창식', text: '안녕하세요 \\(^o^)/' },
     { id: 'm2', author: '김태은', text: '안녕못해요' },
@@ -26,12 +23,57 @@ export default function PartyDetailClient({ partyId }: { partyId: string }) {
     { id: 'm5', author: '박철현', text: '핑크빈 귀여워' }
   ]);
   const [text, setText] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const messagesRef = useRef<HTMLDivElement | null>(null);
+  const [currentUser, setCurrentUser] = useState<string>('');
 
-  const currentUser = '성창식';
+  useEffect(() => {
+    let mounted = true;
+
+    (async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const detail = await fetchPartyDetailClient(partyId);
+        console.log('파티 상세 응답:', detail); // ← 이 줄 추가
+
+        if (!mounted) return;
+
+        const leaderId = detail.leaderId;
+        const rawMembers = detail.members ?? [];
+
+        const mappedMembers = rawMembers.map((m) => ({
+          id: m.id,
+          name: m.name ?? `회원 ${m.id}`,
+          subtitle: m.email ?? undefined,
+          crowned: leaderId === m.id,
+        }));
+
+        setMembers(mappedMembers);
+      } catch (e) {
+        setError('파티 상세 정보를 불러오는 데 실패했습니다.');
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, [partyId]);
 
   useEffect(() => {
     messagesRef.current?.scrollTo({ top: messagesRef.current.scrollHeight });
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      // accessToken을 undefined로 명시적으로 전달
+      const me = await getMyInfo(undefined);
+      setCurrentUser(me?.name ?? me?.email ?? '');
+    })();
   }, []);
 
   const handleSend = () => {
@@ -50,11 +92,14 @@ export default function PartyDetailClient({ partyId }: { partyId: string }) {
     );
   };
 
+  if (loading) return <div>로딩 중...</div>;
+  if (error) return <div className="text-red-500">{error}</div>;
+
   return (
     <div>
       {/* 멤버 그리드 */}
       <div className="grid grid-cols-3 gap-3 mb-4">
-        {members.map(m => (
+        {members.map((m) => (
           <div
             key={m.id}
             className="relative rounded-lg bg-basic-white p-3 flex flex-col items-center text-center shadow-sm"

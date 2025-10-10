@@ -125,3 +125,36 @@ export async function fetchPartiesServer(
 }> {
   return fetchPartiesClient(params);
 }
+
+export async function fetchPartyDetailClient(partyId: string | number): Promise<PartyApiItem> {
+  const url = `${BASE_URL}/api/v1/parties/${partyId}`;
+  const res = await fetch(url, { credentials: 'include', headers: { Accept: 'application/json' } });
+
+  if (!res.ok) {
+    throw new Error(`fetchPartyDetailClient: HTTP ${res.status}`);
+  }
+
+  const json = await res.json();
+  if (json && typeof json === 'object' && 'content' in json) {
+    return json.content as PartyApiItem;
+  }
+
+  return json as PartyApiItem;
+}
+
+export async function joinPartyClient(partyId: string | number): Promise<void> {
+  const url = `${BASE_URL}/api/v1/parties/${partyId}/join`;
+  const res = await fetch(url, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`joinPartyClient: HTTP ${res.status} ${text}`);
+  }
+}

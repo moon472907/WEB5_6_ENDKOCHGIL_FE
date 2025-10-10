@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { mapTag, variantToKorean } from '@/lib/tag';
 import type { PartyApiItem } from '@/lib/api/parties/parties';
+import { joinPartyClient } from '@/lib/api/parties/parties';
 
 export default function PartyCard({
   category,
@@ -79,7 +80,17 @@ export default function PartyCard({
             <Button
               variant="basic"
               size="md"
-              onClick={() => setOpenConfirm(true)}
+              onClick={async () => {
+                try {
+                  if (id) {
+                    await joinPartyClient(id); // 참여 API 호출
+                    router.push(`/partydetail/${id}`);
+                  }
+                } catch (e) {
+                  console.error('참여 실패:', e);
+                  alert('참여에 실패했습니다.');
+                }
+              }}
             >
               참여하기
             </Button>
