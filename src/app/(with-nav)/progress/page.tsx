@@ -12,12 +12,13 @@ export default function Page() {
     name: string;
     category?: string;
     missionTitle?: string;
-    missionIsCompleted?: boolean; // 추가 (API 개선 대비)
+    missionIsCompleted?: boolean;
     current?: number;
     currentMembers?: number;
     max?: number;
     maxMembers?: number;
-    status?: 'COMPLETED' | 'ONGOING' | string;
+    myStatus?: 'PENDING' | 'ACCEPTED' | 'COMPLETED' | 'LEFT';
+    members?: { id?: number; name?: string; status?: string }[];
   };
 
   const [myParties, setMyParties] = useState<Party[]>([]);
@@ -25,35 +26,28 @@ export default function Page() {
   const [tab, setTab] = useState<'ongoing' | 'done'>('ongoing');
 
   useEffect(() => {
+    let mounted = true;
     (async () => {
       setLoading(true);
       try {
-        const list = await fetchMyPartiesWithStatus();
+        // 탭에 따라 서버-결과를 members.status 기준으로 필터한 리스트를 받음
+        const list = await fetchMyPartiesWithStatus(tab === 'ongoing' ? 'ongoing' : 'done');
+        if (!mounted) return;
         setMyParties(list as unknown as Party[]);
       } catch (e) {
         console.error('내 파티 조회 실패', e);
-        setMyParties([]);
+        if (mounted) setMyParties([]);
       } finally {
-        setLoading(false);
+        if (mounted) setLoading(false);
       }
     })();
-  }, []);
+    return () => {
+      mounted = false;
+    };
+  }, [tab]);
 
-  // missionIsCompleted를 우선적으로 판단하도록 개선
-  const filtered = useMemo(() => {
-    if (tab === 'ongoing') {
-      return myParties.filter(
-        p =>
-          p.missionIsCompleted !== true && // 미션이 완료되지 않았거나
-          p.status !== 'COMPLETED' // 상태가 완료가 아닌 경우
-      );
-    }
-    return myParties.filter(
-      p =>
-        p.missionIsCompleted === true || // 미션 완료
-        p.status === 'COMPLETED' // 상태 완료
-    );
-  }, [myParties, tab]);
+  // 이제 filtered는 이미 탭 기준으로 필터된 myParties 사용
+  const filtered = myParties;
 
   const average = useMemo(() => {
     if (!filtered.length) return 0;
