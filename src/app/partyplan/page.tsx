@@ -5,94 +5,301 @@ import PlanToggleCard from '@/components/ui/PlanToggleCard';
 import DayPlanItem from '@/components/ui/DayPlanItem';
 import Tag from '@/components/ui/Tag';
 import Button from '@/components/ui/Button';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import LockPlanItem from '@/components/ui/LockPlanItem';
 import Divider from '@/components/ui/Divider';
 import ConfirmModal from '@/components/modal/ConfirmModal';
+import { useSearchParams } from 'next/navigation';
+import { BASE_URL } from '@/lib/api/config';
+import { updateWeekTasks } from '@/lib/api/mission/mission';
+import { MissionContent, MissionSubGoal, MissionTask } from '@/types/mission';
+
+// 추가: 파티 상세/태그 매핑 함수 import
+import { fetchPartyDetailClient, type PartyApiItem } from '@/lib/api/parties/parties';
+import { mapTag, variantToKorean } from '@/lib/tag';
+// 추가: 현재 사용자 정보
+import { getMyInfo } from '@/lib/api/member';
 
 type WeekState = 'confirmed' | 'current' | 'next' | 'locked';
+type LocalTask = {
+  taskId: number;
+  title: string;
+  dayNum: number;
+  canEdit?: boolean;
+  status?: string;
+};
+type LocalWeek = {
+  id: number;
+  title: string;
+  weekNum: number;
+  weekState: WeekState;
+  startDate?: string | null;
+  endDate?: string | null;
+  tasks: LocalTask[];
+};
 
 export default function Page() {
-  const isLeader = true; // 실제는 API/컨텍스트로 판단
+  const searchParams = useSearchParams();
+  const partyIdParam = searchParams.get('partyId');
+  const partyId = partyIdParam ? Number(partyIdParam) : null;
 
-  // 상태로 관리: 서버 대신 로컬 mock state
-  const [weeks, setWeeks] = useState(() => [
-    {
-      id: 1,
-      title: '단계별 계획 1주차',
-      weekState: 'confirmed' as WeekState,
-      days: [
-        '단어 10개 암기',
-        '문법 공부',
-        '문제 10개 풀기',
-        '문법 문제 5문제 풀기',
-        '독해하기',
-        '리스닝 공부하기',
-        '문제 50개 풀기'
-      ]
-    },
-    {
-      id: 2,
-      title: '단계별 계획 2주차',
-      weekState: 'current' as WeekState,
-      days: [
-        '단어 10개 암기',
-        '문법 공부',
-        '문제 10개 풀기',
-        '문법 문제 5문제 풀기',
-        '독해하기',
-        '리스닝 공부하기',
-        '문제 50개 풀기'
-      ]
-    },
-    {
-      id: 3,
-      title: '단계별 계획 3주차',
-      weekState: 'next' as WeekState,
-      days: [
-        '단어 10개 암기',
-        '문법 공부',
-        '문제 10개 풀기',
-        '문제 및 복습',
-        '독해하기',
-        '리스닝 공부하기',
-        '문제 50개 풀기'
-      ]
-    },
-    {
-      id: 4,
-      title: '단계별 계획 4주차',
-      weekState: 'locked' as WeekState,
-      days: [
-        '단어 10개 암기',
-        '문법 공부',
-        '문제 10개 풀기',
-        '문제 및 복습',
-        '독해하기',
-        '리스닝 공부하기',
-        '문제 50개 풀기'
-      ]
-    }
-  ]);
+  // 변경: isLeader 상태를 서버 데이터로 판정
+  const [isLeader, setIsLeader] = useState<boolean>(false);
 
-  // 모달 제어: 수정 완료 확인용
+  const [weeks, setWeeks] = useState<LocalWeek[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingWeekId, setPendingWeekId] = useState<number | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  // "수정 완료" 클릭 핸들러
-  const handleConfirm = async (weekId: number) => {
-    setWeeks(prev =>
-      prev.map(w =>
-        w.id === weekId ? { ...w, weekState: w.weekState === 'next' ? 'current' : w.weekState } : w
-      )
-    );
+  // pendingChanges: subGoalId -> Map(taskId -> newTitle)
+  const [pendingChanges, setPendingChanges] = useState<Record<number, Record<number, string>>>({});
+
+  // 파티/미션 헤더용 상태
+  const [partyName, setPartyName] = useState<string>('');
+  const [missionCategory, setMissionCategory] = useState<string | undefined>(undefined);
+  const [missionTitle, setMissionTitle] = useState<string>('');
+
+
+  // 추가: UI variant 결정 함수 (DayPlanItem에 전달할 variant 값)
+  const getUiVariant = (weekState: WeekState) =>
+    weekState === 'confirmed' ? 'past' : weekState === 'current' ? 'current' : 'next';
+
+  // 추가: next 주차 편집 허용 판정 로직
+  const isEditableNext = (weekState: WeekState, isInitialCreation: boolean, startDate?: string | null, anyEdited = false) => {
+    if (weekState !== 'next') return false;
+    if (isInitialCreation) return false; // 생성 직후(초기) next는 수정 금지(확인만)
+    if (anyEdited) return false; // 이미 편집된 주차는 더 이상 편집 불가
+    if (!startDate) return true; // 시작일 정보 없으면 허용
+    const allowDate = new Date(startDate);
+    allowDate.setDate(allowDate.getDate() - 7);
+    return new Date() >= allowDate; // 시작일 7일 전부터 편집 허용
   };
 
-  // weekState -> DayPlanItem variant 매핑
-  const mapVariant = (ws: WeekState) => {
-    if (ws === 'confirmed') return 'past';
-    if (ws === 'current') return 'current';
-    return 'next'; // next / locked -> 보여주기 위해 'next' 사용 (locked는 pointer-events-none 처리)
+  // 미션 로드 및 weeks 상태 구성
+  useEffect(() => {
+    let mounted = true;
+    if (!partyId) {
+      setWeeks([]);
+      setLoading(false);
+      return;
+    }
+    (async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await fetch(`${BASE_URL}/api/v1/missions/all`, {
+          credentials: 'include',
+          headers: { Accept: 'application/json' }
+        });
+        if (!res.ok) throw new Error(`missions/all HTTP ${res.status}`);
+        const json = await res.json();
+        const active = Array.isArray(json?.content?.activeMissions) ? json.content.activeMissions : [];
+        const completed = Array.isArray(json?.content?.completedMissions) ? json.content.completedMissions : [];
+        const all = [...active, ...completed] as unknown[];
+
+        const isMissionContent = (v: unknown): v is MissionContent =>
+          typeof v === 'object' && v !== null && 'missionId' in (v as Record<string, unknown>);
+
+        const mission = all.find((m) => isMissionContent(m) && m.partyId !== undefined && m.partyId !== null && Number(m.partyId) === partyId) as MissionContent | undefined;
+
+        if (!mission) {
+          if (mounted) {
+            setWeeks([]);
+            setError('해당 파티의 미션을 찾을 수 없습니다.');
+          }
+          return;
+        }
+
+        // 미션 제목/카테고리 상태 저장 (UI 폴백)
+        if (mounted) {
+          setMissionTitle(String(mission.title ?? ''));
+          setMissionCategory(String(mission.category ?? ''));
+        }
+
+        // 현재 사용자 id 조회
+        const extractMemberId = (v: unknown): number | null => {
+          if (typeof v !== 'object' || v === null) return null;
+          const r = v as Record<string, unknown>;
+          const candidate = r.memberId ?? r.id ?? null;
+          if (typeof candidate === 'number') return candidate;
+          if (typeof candidate === 'string' && candidate.trim() !== '' && !Number.isNaN(Number(candidate))) return Number(candidate);
+          return null;
+        };
+
+        let myId: number | null = null;
+        try {
+          const me = await getMyInfo();
+          myId = extractMemberId(me);
+        } catch {
+          myId = null;
+        }
+
+        // 파티 리더 id 추출
+        const extractLeaderId = (v: unknown): number | null => {
+          if (typeof v !== 'object' || v === null) return null;
+          const r = v as Record<string, unknown>;
+          const direct = r.leaderId ?? null;
+          if (typeof direct === 'number') return direct;
+          if (typeof direct === 'string' && direct.trim() !== '' && !Number.isNaN(Number(direct))) return Number(direct);
+
+          const leaderObj = r.leader;
+          if (typeof leaderObj === 'object' && leaderObj !== null) {
+            const lr = leaderObj as Record<string, unknown>;
+            const lid = lr.id ?? null;
+            if (typeof lid === 'number') return lid;
+            if (typeof lid === 'string' && lid.trim() !== '' && !Number.isNaN(Number(lid))) return Number(lid);
+          }
+          return null;
+        };
+
+        // 파티 테이블의 NAME을 우선으로 사용 및 리더 판정
+        let leaderFlag = false;
+        try {
+          const partyDetail: PartyApiItem = await fetchPartyDetailClient(partyId);
+          if (mounted) setPartyName(String(partyDetail.name ?? ''));
+          const leaderId = extractLeaderId(partyDetail);
+          leaderFlag = leaderId !== null && myId !== null && Number(leaderId) === Number(myId);
+        } catch {
+          if (mounted) setPartyName(String(mission.title ?? '파티 계획'));
+        }
+
+        if (mounted) setIsLeader(Boolean(leaderFlag));
+
+        // 결정 기준: mission.currentWeek (1~4)
+        const currentWeek = typeof mission.currentWeek === 'number' ? mission.currentWeek : 1;
+
+        const subGoalsArr: MissionSubGoal[] = Array.isArray(mission.subGoals) ? mission.subGoals : [];
+
+        // mapped 생성: 생성 시 1~4주까지 만들어지지만 가시성/수정 규칙 적용
+        const mapped: LocalWeek[] = subGoalsArr.map((sg) => {
+          const wkNum = Number(sg.weekNum ?? 0) || 0;
+
+          const tasksSrc: MissionTask[] = Array.isArray(sg.tasks) ? sg.tasks : [];
+          const anyEdited = tasksSrc.some(t => Boolean(t.hasBeenEdited));
+
+          // 기본 상태 결정 (unchanged)
+          let weekState: WeekState = 'locked';
+          if (wkNum < currentWeek) {
+            weekState = 'confirmed';
+          } else if (wkNum === currentWeek) {
+            weekState = 'current';
+          } else if (wkNum === currentWeek + 1) {
+            weekState = 'next';
+          } else {
+            weekState = 'locked';
+          }
+
+          const isInitialCreation = currentWeek === 1;
+          const tasks: LocalTask[] = tasksSrc.map((t) => {
+            const baseCanEdit = Boolean(t.canEdit ?? true);
+            const computedCanEdit =
+              // current 은 읽기 전용
+              weekState === 'current'
+                ? false
+                : weekState === 'next'
+                ? (isEditableNext(weekState, isInitialCreation && wkNum === 2 ? true : isInitialCreation, sg.startDate ?? mission.startDate ?? null, anyEdited) && baseCanEdit)
+                : false;
+
+            return {
+              taskId: Number(t.taskId ?? 0),
+              title: String(t.title ?? ''),
+              dayNum: Number(t.dayNum ?? 0),
+              canEdit: computedCanEdit,
+              status: String(t.status ?? 'PENDING')
+            };
+          });
+
+          return {
+            id: Number(sg.subGoalId ?? 0),
+            title: String(sg.title ?? `주차 ${wkNum}`),
+            weekNum: wkNum,
+            weekState,
+            startDate: sg.startDate ?? null,
+            endDate: sg.endDate ?? null,
+            tasks
+          } as LocalWeek;
+        });
+
+        if (mounted) {
+          setWeeks(mapped);
+        }
+      } catch (err) {
+        console.error('미션 로드 실패', err);
+        if (mounted) setError('미션 로드 실패');
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, [partyId]);
+
+  // DayPlanItem onSave -> 로컬 반영 + pendingChanges에 기록
+  const handleTaskSave = (nextTitle: string, taskId: number, subGoalId: number) => {
+    // 로컬 UI 즉시 반영
+    setWeeks(prev =>
+      prev.map(w =>
+        w.id === subGoalId
+          ? {
+              ...w,
+              tasks: w.tasks.map(t => (t.taskId === taskId ? { ...t, title: nextTitle } : t))
+            }
+          : w
+      )
+    );
+
+    // pendingChanges 기록
+    setPendingChanges(prev => {
+      const copy: Record<number, Record<number, string>> = { ...prev };
+      if (!copy[subGoalId]) copy[subGoalId] = {};
+      copy[subGoalId][taskId] = nextTitle;
+      return copy;
+    });
+  };
+
+  // "수정 완료" 버튼 클릭 -> ConfirmModal 오픈 (pendingWeekId 세팅은 버튼 쪽에서 수행)
+  const handleConfirm = async (weekId: number) => {
+    const week = weeks.find(w => w.id === weekId);
+    if (!week) return;
+
+    // 준비: 변경된 항목이 없으면 바로 상태 전환(버튼 동작 유지)
+    const changesForWeek = pendingChanges[weekId] ?? {};
+    const tasksPayload = Object.keys(changesForWeek).map(k => ({
+      taskId: Number(k),
+      title: changesForWeek[Number(k)]
+    }));
+
+    try {
+      if (tasksPayload.length > 0) {
+        // API 호출: PUT /api/v1/tasks/week
+        await updateWeekTasks(weekId, tasksPayload);
+      }
+
+      // 성공 시: next -> current 로 전환
+      setWeeks(prev =>
+        prev.map(w =>
+          w.id === weekId
+            ? {
+                ...w,
+                weekState: w.weekState === 'next' ? 'current' : w.weekState
+              }
+            : w
+        )
+      );
+
+      // pendingChanges에서 해당 주차 항목 삭제
+      setPendingChanges(prev => {
+        const copy = { ...prev };
+        delete copy[weekId];
+        return copy;
+      });
+    } catch (err) {
+      console.error('주차 태스크 업데이트 실패', err);
+      setError('수정 저장에 실패했습니다. 다시 시도해 주세요.');
+    }
   };
 
   return (
@@ -101,68 +308,75 @@ export default function Page() {
       <ContentWrapper withNav>
         <div className="space-y-4">
           <div className="flex gap-3">
-            <h3 className="text-button-point font-semibold mt-1 text-lg">토익 공부 500점</h3>
-            <Tag variant="study" size="md">학습</Tag>
+            <h3 className="text-button-point font-semibold mt-1 text-lg">
+              {partyName || missionTitle || '파티 계획'}
+            </h3>
+            <Tag variant={mapTag(missionCategory)} size="md">
+              {variantToKorean(missionCategory)}
+            </Tag>
           </div>
           <div className="text-md text-text-sub">일주일 전부터 미션 확인과 수정이 가능해요!</div>
 
           <div className="space-y-3">
-            {weeks.map((w, idx) => {
-              // 비회원(또는 파티장이 아닌 사용자)은 'next' 주차를 편집 불가로 보여야 하므로
-              // 렌더링 전 실제 표시할 weekState를 결정한다.
-              const effectiveWeekState =
-                !isLeader && w.weekState === 'next' ? ('current' as WeekState) : w.weekState;
-              const isLast = idx === weeks.length - 1;
+            {loading ? (
+              <div className="text-sm text-text-sub">로딩 중...</div>
+            ) : error ? (
+              <div className="text-sm text-red-500">{error}</div>
+            ) : (
+              weeks.map((w, idx) => {
+                const effectiveWeekState =
+                  !isLeader && w.weekState === 'next' ? ('current' as WeekState) : w.weekState;
+                const isLast = idx === weeks.length - 1;
 
-              // locked이면 LockPlanItem 형태로 노출
-              if (w.weekState === 'locked') {
+                if (w.weekState === 'locked') {
+                  return (
+                    <div key={w.id} className="space-y-2">
+                      <LockPlanItem label={w.title} />
+                      {!isLast && <Divider />}
+                    </div>
+                  );
+                }
+
                 return (
                   <div key={w.id} className="space-y-2">
-                    <LockPlanItem label={w.title} />
+                    <PlanToggleCard title={w.title} defaultOpen={w.weekNum === 1}>
+                      <ul className="space-y-2">
+                        {w.tasks.map((t) => (
+                          <DayPlanItem
+                            key={t.taskId}
+                            day={t.dayNum}
+                            title={t.title}
+                            variant={getUiVariant(effectiveWeekState)}
+                            taskId={t.taskId}
+                            subGoalId={w.id}
+                            onSave={handleTaskSave}
+                            canEdit={t.canEdit}
+                          />
+                        ))}
+                      </ul>
 
-                    {/* days 숨김: 잠금 상태에서는 항목을 보여주지 않음 */}
+                      {/* 수정 완료 버튼: effectiveWeekState가 'next'일 때만 렌더.
+                          pendingChanges가 없으면 버튼 자체를 렌더하지 않음 */}
+                      {effectiveWeekState === 'next' && isLeader && pendingChanges[w.id] && Object.keys(pendingChanges[w.id]).length > 0 && (
+                        <div className="mt-3 flex justify-end">
+                          <Button
+                            variant="basic"
+                            fullWidth
+                            onClick={() => {
+                              setPendingWeekId(w.id);
+                              setConfirmOpen(true);
+                            }}
+                          >
+                            수정 완료
+                          </Button>
+                        </div>
+                      )}
+                    </PlanToggleCard>
                     {!isLast && <Divider />}
                   </div>
                 );
-              }
-
-              // 그 외(confirmed/current/next)는 토글 카드로 렌더
-              return (
-                <div key={w.id} className="space-y-2">
-                  <PlanToggleCard title={w.title} defaultOpen={w.id === 1}>
-                    <ul className="space-y-2">
-                      {w.days.map((title, idx) => (
-                        <DayPlanItem
-                        taskId={idx}
-                        subGoalId={idx}
-                          key={idx}
-                          day={idx + 1}
-                          title={title}
-                          variant={mapVariant(effectiveWeekState)}
-                        />
-                      ))}
-                    </ul>
-
-                    {/* 수정 완료 버튼: 실제 표시되는 상태(effectiveWeekState)가 'next'인 경우에만, + 파티장일 때만 노출 */}
-                    {effectiveWeekState === 'next' && isLeader && (
-                      <div className="mt-3 flex justify-end">
-                        <Button
-                          variant="basic"
-                          fullWidth
-                          onClick={() => {
-                            setPendingWeekId(w.id);
-                            setConfirmOpen(true);
-                          }}
-                        >
-                          수정 완료
-                        </Button>
-                      </div>
-                    )}
-                  </PlanToggleCard>
-                  {!isLast && <Divider />}
-                </div>
-              );
-            })}
+              })
+            )}
           </div>
         </div>
       </ContentWrapper>
@@ -171,7 +385,9 @@ export default function Page() {
         open={confirmOpen}
         lines={['계획을 수정하시겠어요?']}
         onConfirm={() => {
-          if (pendingWeekId !== null) handleConfirm(pendingWeekId);
+          if (pendingWeekId !== null) {
+            handleConfirm(pendingWeekId);
+          }
           setConfirmOpen(false);
           setPendingWeekId(null);
         }}

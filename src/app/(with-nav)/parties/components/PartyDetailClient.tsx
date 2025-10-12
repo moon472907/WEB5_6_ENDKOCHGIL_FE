@@ -5,6 +5,7 @@ import Button from '@/components/ui/Button';
 import Image from 'next/image';
 import { fetchPartyDetailClient } from '@/lib/api/parties/parties';
 import { getMyInfo } from '@/lib/api/member';
+import { useRouter } from 'next/navigation';
 
 type Member = {
   id?: number; // 변경: id를 optional로 허용
@@ -14,6 +15,7 @@ type Member = {
 };
 
 export default function PartyDetailClient({ partyId }: { partyId: string }) {
+  const router = useRouter();
   const [members, setMembers] = useState<Member[]>([]);
   const [messages, setMessages] = useState([
     { id: 'm1', author: '성창식', text: '안녕하세요 \\(^o^)/' },
@@ -134,7 +136,9 @@ export default function PartyDetailClient({ partyId }: { partyId: string }) {
           variant="basic"
           size="md"
           fullWidth
-          onClick={() => alert('파티 계획 클릭')}
+          onClick={() => {
+            router.push(`/partyplan?partyId=${encodeURIComponent(partyId)}`);
+          }}
         >
           파티 계획
         </Button>
