@@ -5,6 +5,7 @@ import Button from '@/components/ui/Button';
 import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
 import { fetchMyPartiesWithStatus } from '@/lib/api/parties/parties';
+import { BASE_URL } from '@/lib/api/config';
 
 export default function Page() {
   type Party = {
@@ -24,6 +25,10 @@ export default function Page() {
   const [myParties, setMyParties] = useState<Party[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<'ongoing' | 'done'>('ongoing');
+
+  // 오늘의 태스크 매핑: missionTitle -> first task title
+  const [missionTaskMap, setMissionTaskMap] = useState<Map<string, string>>(new Map());
+  const [defaultTaskTitle, setDefaultTaskTitle] = useState<string | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -46,6 +51,51 @@ export default function Page() {
     };
   }, [tab]);
 
+  // 오늘의 태스크를 한 번만 불러와서 missionTitle 기준으로 매핑
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const res = await fetch(`${BASE_URL}/api/v1/tasks/today`, {
+          credentials: 'include',
+          headers: { Accept: 'application/json' }
+        });
+        if (!res.ok) return;
+        const json: unknown = await res.json().catch(() => null);
+        const content = (json && typeof json === 'object' && 'content' in (json as Record<string, unknown>))
+          ? (json as Record<string, unknown>).content
+          : json;
+        const arr = Array.isArray(content) ? content : (content ? [content] : []);
+        const map = new Map<string, string>();
+        let firstTitle: string | null = null;
+
+        for (const item of arr) {
+          if (!item || typeof item !== 'object') continue;
+          const it = item as Record<string, unknown>;
+          const title = (it.title ?? it['taskTitle'] ?? '') as string;
+          const mTitle = (it.missionTitle ?? it['missionTitle'] ?? '') as string;
+
+          if (!firstTitle && title) firstTitle = title;
+          if (mTitle && title && !map.has(mTitle)) {
+            map.set(mTitle, title);
+          }
+        }
+
+        if (mounted) {
+          setMissionTaskMap(map);
+          setDefaultTaskTitle(firstTitle);
+        }
+      } catch (e) {
+        // 실패 시 무시 (default 유지)
+        console.error('오늘의 태스크 조회 실패', e);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   // 이제 filtered는 이미 탭 기준으로 필터된 myParties 사용
   const filtered = myParties;
 
@@ -63,6 +113,12 @@ export default function Page() {
     }
     return count ? Math.round((sum / count) * 100) : 0;
   }, [filtered]);
+
+  const getSubtitleForParty = (p: Party) => {
+    // 우선 missionTitle로 매핑, 없으면 기본 오늘의 태스크, 없으면 빈 문자열
+    const missionTitle = p.missionTitle ?? '';
+    return missionTaskMap.get(missionTitle) ?? defaultTaskTitle ?? '';
+  };
 
   return (
     <ContentWrapper withNav className="relative overflow-hidden z-0">
@@ -139,7 +195,7 @@ export default function Page() {
                 id={i.id}
                 title={i.name}
                 tag={i.category}
-                subtitle={i.missionTitle ?? ''}
+                subtitle={getSubtitleForParty(i)}
                 current={i.current ?? i.currentMembers ?? 0}
                 max={i.max ?? i.maxMembers ?? 100}
                 compact={tab === 'done'}

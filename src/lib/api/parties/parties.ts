@@ -212,6 +212,6 @@ export async function fetchMyPartiesWithStatus(
 
   // done: 본인 상태가 COMPLETED 또는 LEFT 이거나, 파티 전체 미션이 완료된 경우
   return mapped.filter(
-    p => p.myStatus === 'COMPLETED' || p.myStatus === 'LEFT' || p.missionIsCompleted === true
+    p => p.myStatus === 'COMPLETED' || p.myStatus === 'LEFT'
   );
 }
