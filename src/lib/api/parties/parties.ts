@@ -169,6 +169,8 @@ export async function fetchMyPartiesWithStatus(
   Array<
     PartyApiItem & {
       myStatus?: 'PENDING' | 'ACCEPTED' | 'COMPLETED' | 'LEFT';
+      current?: number; // 진행률 % (0..100)
+      max?: number;     // 항상 100 (퍼센트 기준)
     }
   >
 > {
@@ -179,19 +181,17 @@ export async function fetchMyPartiesWithStatus(
   try {
     const resp = await fetchPartiesClient({ size: 200 });
     list = resp.list ?? [];
-  } catch (e) {
-    console.error('fetchPartiesClient 실패:', e);
+  } catch (err) {
+    console.error('fetchPartiesClient 실패:', err);
     return [];
   }
 
-  // 본인 관련 파티만 추출 (리더 포함)
   const myList = list.filter(party => {
     const isLeader = String(party.leaderId) === String(me.id);
     const isMember = (party.members ?? []).some(m => String(m?.id) === String(me.id));
     return isLeader || isMember;
   });
 
-  // myStatus 추출 (문자열로 안전 비교)
   const mapped = myList.map(party => {
     const myMember = (party.members ?? []).find(m => String(m?.id) === String(me.id));
     const myStatus = myMember?.status as
@@ -203,15 +203,102 @@ export async function fetchMyPartiesWithStatus(
     return { ...party, myStatus };
   });
 
-  if (filter === 'all') return mapped;
+  // Mission 관련 최소 타입 (명시적, any 금지)
+  type MissionTask = {
+    taskId?: number;
+    status?: string | null;
+  };
+  type MissionSubGoal = {
+    tasks?: MissionTask[] | null;
+    taskDtos?: MissionTask[] | null;
+  };
+  type MissionItem = {
+    missionId?: number;
+    partyId?: number | null;
+    myProgressRate?: number | null;
+    partyProgress?: { myProgress?: number | null } | null;
+    subGoals?: MissionSubGoal[] | null;
+    subGoalsDto?: MissionSubGoal[] | null;
+    totalWeeks?: number | null;
+  };
 
-  if (filter === 'ongoing') {
-    // 진행중: 본인 상태가 명확히 ACCEPTED인 경우만
-    return mapped.filter(p => p.myStatus === 'ACCEPTED');
+  // missions 안전 파싱
+  let missions: MissionItem[] = [];
+  try {
+    const mRes = await fetch(`${BASE_URL}/api/v1/missions`, {
+      credentials: 'include',
+      headers: { Accept: 'application/json' }
+    });
+    if (mRes.ok) {
+      const text = await mRes.text().catch(() => '');
+      const parsed = safeJsonParse<Record<string, unknown>>(text);
+      const content = parsed?.content;
+      if (content && typeof content === 'object') {
+        const contentObj = content as Record<string, unknown>;
+        const activeVal = contentObj['activeMissions'];
+        const completedVal = contentObj['completedMissions'];
+        if (Array.isArray(activeVal)) {
+          missions = missions.concat(activeVal as MissionItem[]);
+        }
+        if (Array.isArray(completedVal)) {
+          missions = missions.concat(completedVal as MissionItem[]);
+        }
+        if (missions.length === 0 && Array.isArray(content)) {
+          missions = content as MissionItem[];
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('missions 조회 실패:', err);
+    missions = [];
   }
 
-  // done: 본인 상태가 COMPLETED 또는 LEFT 이거나, 파티 전체 미션이 완료된 경우
-  return mapped.filter(
-    p => p.myStatus === 'COMPLETED' || p.myStatus === 'LEFT'
-  );
+  // 각 파티에 대해 안전하게 current/max 계산 (객체 불변 방식)
+  const enriched = mapped.map(p => {
+    try {
+      const mission = missions.find(m => m.partyId !== undefined && m.partyId !== null && String(m.partyId) === String(p.id));
+      const DEFAULT_MAX = 100;
+
+      if (mission) {
+        // 1) 백엔드 퍼센트 우선 사용
+        const pct = mission.myProgressRate ?? mission.partyProgress?.myProgress;
+        if (typeof pct === 'number' && !Number.isNaN(pct)) {
+          const current = Math.max(0, Math.min(100, Math.round(pct)));
+          return { ...p, current, max: DEFAULT_MAX };
+        }
+
+        // 2) subGoals.tasks가 있으면 태스크 수 기반 계산
+        const subGoals = mission.subGoals ?? mission.subGoalsDto ?? [];
+        if (Array.isArray(subGoals) && subGoals.length > 0) {
+          let totalTasks = 0;
+          let completedTasks = 0;
+          for (const sg of subGoals) {
+            const tasks = sg.tasks ?? sg.taskDtos ?? [];
+            if (!Array.isArray(tasks) || tasks.length === 0) continue;
+            totalTasks += tasks.length;
+            completedTasks += tasks.filter(t => String((t.status ?? 'PENDING')).toUpperCase() === 'COMPLETED').length;
+          }
+          totalTasks = Math.max(7, Math.min(28, totalTasks || 7));
+          const percent = Math.round((completedTasks / totalTasks) * 100);
+          const current = Math.max(0, Math.min(100, percent));
+          return { ...p, current, max: DEFAULT_MAX };
+        }
+
+        // 3) totalWeeks로 추정 가능하면 폴백(현재 0%)
+        const weeks = Number(mission.totalWeeks ?? 0) || 0;
+        if (weeks > 0) {
+          return { ...p, current: 0, max: DEFAULT_MAX };
+        }
+      }
+    } catch (err) {
+      console.warn('파티 보정 중 오류', p.id, err);
+    }
+
+    // 최종 폴백: 0%
+    return { ...p, current: 0, max: 100 };
+  });
+
+  if (filter === 'all') return enriched;
+  if (filter === 'ongoing') return enriched.filter(p => p.myStatus === 'ACCEPTED');
+  return enriched.filter(p => p.myStatus === 'COMPLETED' || p.myStatus === 'LEFT');
 }
