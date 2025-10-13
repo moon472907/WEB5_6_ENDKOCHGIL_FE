@@ -20,21 +20,27 @@ export async function getTodayTask(
     redirect('/login');
   }
 
-  const res = await fetch(`${BASE_URL}/api/v1/tasks/today`, {
-    method: 'GET',
-    cache: 'no-store',
-    credentials: 'include',
-    headers: {
-      Cookie: `accessToken=${accessToken}`
+  try {
+    const res = await fetch(`${BASE_URL}/api/v1/tasks/today`, {
+      method: 'GET',
+      cache: 'no-store',
+      credentials: 'include',
+      headers: {
+        Cookie: `accessToken=${accessToken}`
+      }
+    });
+
+    if (!res.ok) {
+      await handleAuthError(res, '오늘의 테스크 리스트 조회 실패');
+      return [];
     }
-  });
 
-  if (!res.ok) {
-    await handleAuthError(res, '오늘의 테스크 리스트 조회 실패');
+    const data = await res.json();
+    return data?.content ?? [];
+  } catch (error) {
+    console.error('[getTodayTask] 서버 오류:', error);
+    return [];
   }
-
-  const data = await res.json();
-  return data.content;
 }
 
 /**
