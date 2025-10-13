@@ -69,7 +69,7 @@ export default function NotificationList({
             ))}
           </ul>
         ) : (
-          <p className="text-xs text-gray-400 text-center py-4">
+          <p className="text-xs text-gray-400 text-center py-4 pb-8">
             알림이 없습니다
           </p>
         )}

@@ -29,9 +29,15 @@ export function useNotifications(accessToken?: string) {
 
   const handleRead = async (id: number) => {
     try {
-      setNotifications(prev =>
-        prev.map(n => (n.id === id ? { ...n, isRead: true } : n))
-      );
+      setNotifications(prev => {
+        const updated = prev.map(n =>
+          n.id === id ? { ...n, isRead: true } : n
+        );
+        // 읽지 않은 알림이 남아 있는지 확인
+        setHasUnread(updated.some(n => !n.isRead));
+        return updated;
+      });
+
       await readNotification(id);
     } catch (err) {
       console.error('읽음 처리 실패:', err);
