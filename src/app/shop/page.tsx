@@ -9,6 +9,7 @@ import CategoryTabs, { Category } from './components/CategoryTabs';
 import ItemGrid from './components/ItemGrid';
 import { Item, mockItems } from './items';
 import ConfirmModal from '@/components/modal/ConfirmModal';
+import { HiOutlineRefresh } from 'react-icons/hi';
 
 export default function Page() {
   const [tab, setTab] = useState<'shop' | 'closet'>('shop'); // 탭 상태 관리
@@ -75,6 +76,16 @@ export default function Page() {
           priority
           className="absolute -top-1/2 left-1/2 -translate-x-1/2 z-10"
         />
+        {tab === 'closet' && (
+          <button
+            type="button"
+            className="cursor-pointer rounded-full bg-basic-white h-10 w-10"
+          >
+            <div className='text-basic-black flex flex-col items-center justify-center'>
+              <HiOutlineRefresh size={20} />
+            </div>
+          </button>
+        )}
       </section>
 
       {/* 아이템 영역 */}
