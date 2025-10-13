@@ -6,7 +6,7 @@ import Button from '../ui/Button';
 interface Props {
   open: boolean;
   onConfirm: () => void;
-  onCancel: () => void;
+  onCancel?: () => void;
   confirmText?: string;
   title: string;
   description?: string;
@@ -27,7 +27,7 @@ function AlertModal({
   disabledMessage
 }: Props) {
   return (
-    <BaseModal isOpen={open} onClose={onCancel}>
+    <BaseModal isOpen={open} onClose={onCancel ?? onConfirm}>
       {/* 텍스트 영역 */}
       <div className="text-center space-y-3 break-keep">
         {/* 타이틀 */}
@@ -44,7 +44,7 @@ function AlertModal({
       <div className="mt-3">
         <Button
           type="button"
-          onClick={disabled ? onCancel : onConfirm}
+          onClick={disabled ? (onCancel ?? onConfirm) : onConfirm}
           variant="basic"
           size="md"
           fullWidth
