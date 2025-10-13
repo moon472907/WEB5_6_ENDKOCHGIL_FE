@@ -18,8 +18,8 @@ export default function MissionCard({
         <div className="flex gap-1">
           <MdPerson size={20} className="text-[#434343]" />
           <p className="text-sm font-medium text-gray-04">
-            {task.partyCompletion.completedMembers}/
-            {task.partyCompletion.totalMembers}명 참가중
+            {task.partyCompletion?.completedMembers}/
+            {task.partyCompletion?.totalMembers}명 참가중
           </p>
         </div>
       </div>
