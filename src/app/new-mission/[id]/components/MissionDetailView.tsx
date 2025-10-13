@@ -106,23 +106,22 @@ export default function MissionDetailView({ mission: initialMission }: Props) {
       if (memberId) {
         await createNotification({
           memberId,
-          message: `미션 "${mission.title}"의 계획을 생성했습니다.`,
+          message: `새로운 미션 "${mission.title}"을 생성했어요!`,
           type: 'MESSAGE'
         });
       }
 
       // (3) 홈으로 이동
-      alert('변경 사항이 성공적으로 처리되었습니다!');
       router.push('/');
     } catch (err) {
-      console.error('Task 수정 또는 알림 처리 실패:', err);
-      alert('수정 중 오류가 발생했습니다.');
+      console.error('미션 생성 완료 또는 알림 처리 실패:', err);
+      alert('미션 생성 완료 중 오류가 발생했어요.');
     }
   };
 
   return (
     <>
-      <Header title="생성한 미션 확인" />
+      <Header title="미션 계획" />
       <ContentWrapper padding="xl">
         <form
           onSubmit={handleSubmit}
@@ -137,7 +136,7 @@ export default function MissionDetailView({ mission: initialMission }: Props) {
             fullWidth
             className="flex mt-20 mb-5"
           >
-            수정사항 저장
+            미션 생성 완료
           </Button>
         </form>
       </ContentWrapper>

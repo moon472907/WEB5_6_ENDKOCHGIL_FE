@@ -21,9 +21,7 @@ export default function PeriodSection({
       label="기간"
       tooltip={
         <>
-          기간은 1주일 단위로 설정할 수 있습니다
-          <br />
-          파티 모집에 등록되지 않습니다
+          기간은 1주일 단위로 설정할 수 있어요
         </>
       }
     >
