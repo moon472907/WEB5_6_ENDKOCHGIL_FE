@@ -7,8 +7,8 @@ export default function CharacterSection() {
       <Image
         src="/images/nuts-default.png"
         alt="너츠"
-        width={110}
-        height={165}
+        width={150}
+        height={150}
         className="absolute -top-1/2 left-1/2 -translate-x-1/2 z-10"
       />
       <Link href="/shop" className="cursor-pointer">

@@ -55,3 +55,18 @@ export async function getOwnedItemIds(accessToken: string) {
 
   return ownedIds;
 }
+
+
+// 아이템 장착 해제
+export async function unequipTitle(accessToken: string): Promise<void> {
+  const res = await fetch(`${BASE_URL}/api/v1/members/unequip/item`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Cookie: `accessToken=${accessToken}`,
+    },
+    credentials: "include",
+  });
+
+  if (!res.ok) throw new Error("아이템 장착 해제 실패");
+}

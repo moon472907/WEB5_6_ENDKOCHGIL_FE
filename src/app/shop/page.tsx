@@ -23,7 +23,9 @@ export default async function Page() {
       owned: ownedIds.includes(item.id)
     }));
 
-    return <ShopClient coin={profile.money} initialItems={mergedItems} />;
+    const equippedItemImg = profile?.item ?? null;
+
+    return <ShopClient coin={profile.money} initialItems={mergedItems} equippedItemImg={equippedItemImg} />;
   } catch (err) {
     console.error("회원 정보 로드 중 오류 발생:", err);
     redirect("/login");

@@ -14,9 +14,10 @@ import { Item } from '@/lib/api/shop/item';
 interface Props {
   coin: number; // 서버에서 받은 코인
   initialItems: Item[]; // 서버에서 받은 아이템 리스트
+  equippedItemImg?: string | null;
 }
 
-export default function ShopClient({ coin, initialItems }: Props) {
+export default function ShopClient({ coin, initialItems, equippedItemImg }: Props) {
   const [tab, setTab] = useState<'shop' | 'closet'>('shop'); // 탭 상태 관리
   const [category, setCategory] = useState<Category>('all'); // 카테고리 상태 관리
   const [selectedItem, setSelectedItem] = useState<Item | null>(null); // 선택한 아이템 상태 관리
@@ -75,10 +76,10 @@ export default function ShopClient({ coin, initialItems }: Props) {
       {/* 너츠 영역 */}
       <section className="flex bg-nuts-floor px-5 items-center justify-end relative h-[120px] flex-none">
         <Image
-          src="/images/nuts-kid.png"
+          src={equippedItemImg ?? '/images/nuts-default.png'}
           alt="너츠"
-          width={110}
-          height={165}
+          width={150}
+          height={150}
           priority
           className="absolute -top-1/2 left-1/2 -translate-x-1/2 z-10"
         />
