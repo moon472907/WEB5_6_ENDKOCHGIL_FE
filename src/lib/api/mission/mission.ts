@@ -76,3 +76,17 @@ export async function updateWeekTasks(
 
   console.log('Task 수정 완료');
 }
+
+/**
+ * 전체 미션 조회 API
+ * @returns MissionResponse
+ */
+export async function fetchAllMissions(): Promise<MissionResponse> {
+  const res = await fetch(`${BASE_URL}/api/v1/missions/all`, {
+    credentials: 'include',
+    headers: { Accept: 'application/json' }
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const json = await res.json();
+  return json as MissionResponse;
+}

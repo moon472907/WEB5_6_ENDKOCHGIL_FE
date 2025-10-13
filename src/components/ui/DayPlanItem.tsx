@@ -12,6 +12,7 @@ interface DayPlanItemProps {
   taskId: number;
   subGoalId: number;
   onSave?: (nextTitle: string, taskId: number, subGoalId: number) => void;
+  canEdit?: boolean;
 }
 
 export default function DayPlanItem({
@@ -20,10 +21,24 @@ export default function DayPlanItem({
   variant,
   taskId,
   subGoalId,
-  onSave
+  onSave,
+  canEdit = true
 }: DayPlanItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [value, setValue] = useState(title);
+
+  // title prop 변경 시 동기화
+  useEffect(() => {
+    setValue(title);
+  }, [title]);
+
+  // canEdit이 false로 바뀌면 편집 중이면 취소
+  useEffect(() => {
+    if (!canEdit && isEditing) {
+      setIsEditing(false);
+      setValue(title);
+    }
+  }, [canEdit, isEditing, title]);
 
   // input DOM 참조
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -99,10 +114,14 @@ export default function DayPlanItem({
         )}
       </div>
 
-      {variant === 'next' && (
+      {variant === 'next' && canEdit && (
         <button
           type="button"
-          onClick={() => (isEditing ? handleSave() : setIsEditing(true))}
+          onClick={() => {
+            if (!canEdit) return;
+            if (isEditing) handleSave();
+            else setIsEditing(true);
+          }}
           className="text-button-point cursor-pointer"
         >
           {isEditing ? <MdCheck /> : <MdEdit />}

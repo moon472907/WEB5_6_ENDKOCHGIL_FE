@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import { mapTag, variantToKorean } from '@/lib/tag';
 import type { PartyApiItem } from '@/lib/api/parties/parties';
 import { joinPartyClient } from '@/lib/api/parties/parties';
+import { useRouter } from 'next/navigation';
 
 export default function PartyCard({
   category,
@@ -24,6 +25,8 @@ export default function PartyCard({
   people?: string;
   id?: number | string;
 }) {
+  const router = useRouter();
+
   // 시작일 포맷: "2025년 9월 21일"
   const formatKoreanDate = (iso?: string) => {
     if (!iso) return '';
@@ -74,7 +77,18 @@ export default function PartyCard({
           </p>
 
           <div className="mt-4 flex gap-3">
-            <Button variant="detail" size="md">
+            <Button
+              variant="detail"
+              size="md"
+              onClick={() => {
+                // 상세(미션 계획) 페이지로 이동 (partyId 쿼리 전달)
+                if (id !== undefined && id !== null) {
+                  router.push(`/partyplan?partyId=${encodeURIComponent(String(id))}`);
+                } else {
+                  router.push('/partyplan');
+                }
+              }}
+            >
               자세히
             </Button>
             <Button
