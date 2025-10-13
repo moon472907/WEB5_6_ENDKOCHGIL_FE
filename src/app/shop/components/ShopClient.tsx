@@ -7,25 +7,27 @@ import { useEffect, useRef, useState } from 'react';
 import TabBar from './TabBar';
 import CategoryTabs, { Category } from './CategoryTabs';
 import ItemGrid from './ItemGrid';
-import { Item, mockItems } from '../items';
 import ConfirmModal from '@/components/modal/ConfirmModal';
 import { HiOutlineRefresh } from 'react-icons/hi';
+import { Item } from '@/lib/api/shop/item';
 
 interface Props {
   coin: number; // 서버에서 받은 코인
+  initialItems: Item[]; // 서버에서 받은 아이템 리스트
 }
 
-export default function ShopClient({ coin }: Props) {
+export default function ShopClient({ coin, initialItems }: Props) {
   const [tab, setTab] = useState<'shop' | 'closet'>('shop'); // 탭 상태 관리
   const [category, setCategory] = useState<Category>('all'); // 카테고리 상태 관리
   const [selectedItem, setSelectedItem] = useState<Item | null>(null); // 선택한 아이템 상태 관리
+  const [items, setItems] = useState<Item[]>(initialItems);
   const listRef = useRef<HTMLDivElement | null>(null); // 스크롤 상태 관리
 
   // 아이템 필터링
-  const filteredItems = mockItems.filter(
+  const filteredItems = items.filter(
     item =>
       (tab === 'shop' ? !item.owned : item.owned) &&
-      (category === 'all' || item.category === category)
+      (category === 'all' || item.itemType === category.toUpperCase())
   );
 
   // 탭 바뀔 때 스크롤, 카테고리 초기화

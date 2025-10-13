@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
 import { redirect } from "next/navigation";
 import { getMyInfo } from '@/lib/api/member';
+import { getAllItems, getOwnedItemIds } from '@/lib/api/shop/item';
 import ShopClient from './components/ShopClient';
 
 export default async function Page() {
@@ -10,9 +11,19 @@ export default async function Page() {
 
     if (!accessToken) redirect("/login");
 
-    const profile = await getMyInfo(accessToken);
+    const [profile, allItems, ownedIds] = await Promise.all([
+      getMyInfo(accessToken),
+      getAllItems(accessToken),
+      getOwnedItemIds(accessToken)
+    ]);
 
-    return <ShopClient coin={profile.money} />;
+    // 보유 여부 추가
+    const mergedItems = allItems.map(item => ({
+      ...item,
+      owned: ownedIds.includes(item.id)
+    }));
+
+    return <ShopClient coin={profile.money} initialItems={mergedItems} />;
   } catch (err) {
     console.error("회원 정보 로드 중 오류 발생:", err);
     redirect("/login");
