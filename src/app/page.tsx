@@ -12,12 +12,17 @@ export default async function Home() {
   const accessToken = (await cookieStore).get('accessToken')?.value;
   const tasks = await getTodayTask(accessToken);
   const profile = await getMyInfo(accessToken);
-  await setDevTime('2025-10-13');
+  
+  if (process.env.NODE_ENV === 'development') {
+    await setDevTime('2025-10-13');
+  }
+
+  const equippedItemImg = profile?.item ?? null;
   
   return (
     <div className="flex flex-col min-h-dvh pb-20">
       <HeaderSection profile={profile} accessToken={accessToken} />
-      <CharacterSection />
+      <CharacterSection equippedItemImg={equippedItemImg} />
       <MissionListSection tasks={tasks} />
       <Nav />
     </div>
