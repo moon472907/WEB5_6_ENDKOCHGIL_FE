@@ -51,7 +51,7 @@ export default function MissionCreateView({
       const message =
         error instanceof Error
           ? error.message
-          : '알 수 없는 오류가 발생했습니다.';
+          : '미션 생성 중 오류가 발생했습니다. 다시 시도해주세요.';
       onError(message);
     } finally {
       setLoading(false);
