@@ -88,3 +88,25 @@ export async function unequipItem(accessToken: string): Promise<void> {
 
   if (!res.ok) throw new Error("아이템 장착 해제 실패");
 }
+
+
+// 아이템 구매
+export async function buyItem(accessToken: string, id: number): Promise<void> {
+  const res = await fetch(`${BASE_URL}/api/v1/members/buy/item/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Cookie: `accessToken=${accessToken}`,
+    },
+    credentials: "include",
+  });
+
+  const data = await res.json().catch(() => null);
+
+  if (!res.ok) {
+    if (res.status === 400 && data?.message?.includes('돈 부족')) {
+      throw new Error('NOT_ENOUGH_MONEY');
+    }
+    throw new Error("아이템 구매 실패");
+  }
+}

@@ -9,7 +9,7 @@ import CategoryTabs, { Category } from './CategoryTabs';
 import ItemGrid from './ItemGrid';
 import ConfirmModal from '@/components/modal/ConfirmModal';
 import { HiOutlineRefresh } from 'react-icons/hi';
-import { equipItem, Item, unequipItem } from '@/lib/api/shop/item';
+import { buyItem, equipItem, Item, unequipItem } from '@/lib/api/shop/item';
 import { useRouter } from 'next/navigation';
 
 interface Props {
@@ -58,7 +58,16 @@ export default function ShopClient({ coin, initialItems, equippedItemImg, access
 
     try {
       if (tab === 'shop') {
-        alert(`구매 완료`);
+        await buyItem(accessToken!, selectedItem.id);
+        alert(`"${selectedItem.name}" 아이템을 구매했습니다!`);
+        router.refresh();
+        
+        setItems(prev =>
+          prev.map(item =>
+            item.id === selectedItem.id ? { ...item, owned: true } : item
+          )
+        );
+
       } else {
         if (selectedItem.img === equippedItemImg) {
           alert("이미 착용 중인 아이템입니다!");
@@ -67,11 +76,19 @@ export default function ShopClient({ coin, initialItems, equippedItemImg, access
         }
 
         await equipItem(accessToken!, selectedItem.id);
+        alert(`"${selectedItem.name}" 아이템을 착용했습니다!`);
         router.refresh();
       }
     } catch (err) {
       console.error(err);
-      alert('아이템 착용 중 오류가 발생했습니다');
+      
+      if (err instanceof Error) {
+        if (err.message === 'NOT_ENOUGH_MONEY'){
+          alert('코인이 부족합니다.')
+        } else {
+          alert(tab === 'shop' ? '아이템 구매 중 오류가 발생했습니다.' : '아이템 착용 중 오류가 발생했습니다.')
+        };
+      }
     }
     setSelectedItem(null);
   };
