@@ -1,5 +1,6 @@
 import { CreateMissionRequest, MissionResponse } from '@/types/mission';
 import { BASE_URL } from '../config';
+import { handleAuthError } from '../error';
 
 /**
  * 미션 생성 API
@@ -11,27 +12,19 @@ export async function createMission(
 ): Promise<MissionResponse> {
   console.log('data = :', JSON.stringify(data));
 
-  const res = await fetch(
-    `${BASE_URL}/api/v1/missions`,
-    {
-      method: 'POST',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(data)
-    }
-  );
+  const res = await fetch(`${BASE_URL}/api/v1/missions`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+  });
 
   console.log('미션 생성 res', res);
 
   if (!res.ok) {
-    // 응답 body를 text로 먼저 확인 (json일 수도, html일 수도 있음)
-    const errorText = await res.text().catch(() => '');
-    console.error('서버 에러 응답:', errorText);
-    throw new Error(
-      `미션 생성 실패: ${res.status} ${res.statusText} ${errorText}`
-    );
+    await handleAuthError(res, '미션 생성 실패');
   }
   return res.json();
 }
@@ -44,21 +37,16 @@ export async function createMission(
 export async function getMissionDetail(
   missionId: number
 ): Promise<MissionResponse> {
-  const res = await fetch(
-    `${BASE_URL}/api/v1/missions/${missionId}`,
-    {
-      method: 'GET',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json'
-      }
+  const res = await fetch(`${BASE_URL}/api/v1/missions/${missionId}`, {
+    method: 'GET',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json'
     }
-  );
+  });
 
   if (!res.ok) {
-    const errorText = await res.text().catch(() => '');
-    console.error('서버 에러 응답:', errorText);
-    throw new Error(`미션 상세 조회 실패: ${res.status} ${res.statusText}`);
+    await handleAuthError(res, '미션 상세 조회 실패');
   }
 
   return res.json();
@@ -75,22 +63,15 @@ export async function updateWeekTasks(
 ): Promise<void> {
   const payload = { subGoalId, tasks };
 
-  const res = await fetch(
-    `${BASE_URL}/api/v1/tasks/week`,
-    {
-      method: 'PUT',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    }
-  );
+  const res = await fetch(`${BASE_URL}/api/v1/tasks/week`, {
+    method: 'PUT',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
 
   if (!res.ok) {
-    const errorText = await res.text().catch(() => '');
-    console.error('서버 에러 응답:', errorText);
-    throw new Error(
-      `Task 수정 실패: ${res.status} ${res.statusText} ${errorText}`
-    );
+    await handleAuthError(res, '주차별 task 수정 실패');
   }
 
   console.log('Task 수정 완료');
