@@ -1,100 +1,215 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import Button from '@/components/ui/Button';
 import Image from 'next/image';
+import Button from '@/components/ui/Button';
 import { fetchPartyDetailClient } from '@/lib/api/parties/parties';
 import { getMyInfo } from '@/lib/api/member';
 import { useRouter } from 'next/navigation';
 
+// STOMP v5
+import { Client, IMessage, IFrame, StompSubscription } from '@stomp/stompjs';
+import SockJS from 'sockjs-client';
+
 type Member = {
-  id?: number; // 변경: id를 optional로 허용
+  id?: number;
   name: string;
   subtitle?: string;
+  title?: string;
   crowned?: boolean;
+};
+
+type ChatMessageDto = {
+  id?: number; // 서버가 부여하는 메시지 ID
+  senderEmail?: string; // 서버가 내려주는 발신자 식별자
+  content?: string | null; // 삭제 이벤트면 null일 수 있음
+  partyId: number;
 };
 
 export default function PartyDetailClient({ partyId }: { partyId: string }) {
   const router = useRouter();
+
   const [members, setMembers] = useState<Member[]>([]);
-  const [messages, setMessages] = useState([
-    { id: 'm1', author: '성창식', text: '안녕하세요 \\(^o^)/' },
-    { id: 'm2', author: '김태은', text: '안녕못해요' },
-    { id: 'm3', author: '이성균', text: '메이플 하고싶다' },
-    { id: 'm4', author: '이성균', text: '칼바람 하고싶다' },
-    { id: 'm5', author: '박철현', text: '핑크빈 귀여워' }
-  ]);
+  const [messages, setMessages] = useState<ChatMessageDto[]>([]);
   const [text, setText] = useState('');
+  const [currentUser, setCurrentUser] = useState<string>('');
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const [currentUserTitle, setCurrentUserTitle] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const messagesRef = useRef<HTMLDivElement | null>(null);
-  const [currentUser, setCurrentUser] = useState<string>('');
 
+  const messagesRef = useRef<HTMLDivElement | null>(null);
+
+  // STOMP 클라이언트 ref
+  const stompRef = useRef<Client | null>(null);
+  // console.log(stompRef.current);
+
+  // 1) 파티 상세 + 멤버
   useEffect(() => {
     let mounted = true;
-
     (async () => {
       setLoading(true);
       setError(null);
-
       try {
         const detail = await fetchPartyDetailClient(partyId);
-        console.log('파티 상세 응답:', detail);
-
         if (!mounted) return;
-
         const leaderId = detail.leaderId;
-        const rawMembers = detail.members ?? [];
-
-        const mappedMembers: Member[] = rawMembers
-          .map((m) => ({
-            id: typeof m.id === 'number' ? m.id : undefined,
-            name: m.name ?? `회원 ${m.id ?? ''}`,
-            subtitle: m.email ?? undefined,
-            crowned: leaderId === m.id,
-          }))
-          // id가 반드시 필요하면 필터 (옵션) — 현재는 optional 허용하므로 필터 안함
-          ;
-
-        setMembers(mappedMembers);
+        const rawMembers = (detail.members ?? []) as Array<Record<string, unknown>>;
+        const mapped: Member[] = rawMembers.map((m) => {
+          const id = typeof m['id'] === 'number' ? (m['id'] as number) : undefined;
+          const name = typeof m['name'] === 'string' ? (m['name'] as string) : `회원 ${id ?? ''}`;
+          const subtitle = typeof m['email'] === 'string' ? (m['email'] as string) : undefined;
+          const title = typeof m['title'] === 'string' ? (m['title'] as string) : undefined;
+          return {
+            id,
+            name,
+            subtitle,
+            title,
+            crowned: leaderId === id
+          };
+        });
+        setMembers(mapped);
       } catch {
         setError('파티 상세 정보를 불러오는 데 실패했습니다.');
       } finally {
         if (mounted) setLoading(false);
       }
     })();
-
     return () => {
       mounted = false;
     };
   }, [partyId]);
 
-  useEffect(() => {
-    messagesRef.current?.scrollTo({ top: messagesRef.current.scrollHeight });
-  }, []);
-
+  // 2) 내 정보(이름/이메일)
   useEffect(() => {
     (async () => {
-      // accessToken을 undefined로 명시적으로 전달
-      const me = await getMyInfo(undefined);
-      setCurrentUser(me?.name ?? me?.email ?? '');
+      try {
+        const me = await getMyInfo(undefined);
+        setCurrentUser(me?.name ?? me?.email ?? '');
+        setCurrentUserId(typeof me?.id === 'number' ? me.id : null);
+        setCurrentUserTitle(me?.title ?? null); // 장착된 칭호
+
+        // (참고) getMyTitles 사용 불필요하면 호출하지 않음 — title.ts는 수정 금지 조건으로 서버에서 재사용 권장
+      } catch (err) {
+        console.error('❌ [ERROR] 내 정보 조회 실패:', err);
+      }
     })();
   }, []);
 
+  // 3) 기존 채팅 히스토리 (HTTP)
+  useEffect(() => {
+    const loadHistory = async () => {
+      try {
+        const res = await fetch(
+          `/api/v1/parties/${partyId}/chat/history?page=0&size=30`,
+          {
+            credentials: 'include' // 쿠키 인증 사용 시
+          }
+        );
+        const data = await res.json();
+        if (Array.isArray(data?.content)) {
+          // 최신이 먼저라면 UI에서 뒤집을지, 그대로 둘지 정책 선택
+          setMessages(data.content.reverse()); // 오래된 → 최신 순으로 보이게
+        }
+      } catch (e) {
+        console.error('Error fetching chat history:', e);
+      }
+    };
+    loadHistory();
+  }, [partyId]);
+
+  // 4) STOMP 연결 및 구독
+  useEffect(() => {
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+    if (!API_BASE_URL) {
+      console.error('NEXT_PUBLIC_API_BASE_URL 환경변수가 정의되지 않았습니다.');
+      return;
+    }
+
+    const base = API_BASE_URL.replace(/\/$/, '');
+    // SockJS는 HTTP/HTTPS 엔드포인트를 사용하므로 http(s) 그대로 사용
+    const sockEndpoint = `${base}/ws/chat`;
+
+    let subscription: StompSubscription | null = null;
+    const client = new Client({
+      webSocketFactory: () => new SockJS(sockEndpoint), //  SockJS가 HTTP/S 핸드셰이크 시작
+      reconnectDelay: 5000,
+      heartbeatIncoming: 10000,
+      heartbeatOutgoing: 10000,
+      debug:
+        process.env.NEXT_PUBLIC_NODE_ENV !== 'production'
+          ? (msg: string) => console.log('[STOMP]', msg)
+          : undefined,
+      onConnect: () => {
+        console.log('STOMP 연결 성공:', sockEndpoint);
+        subscription = client.subscribe(
+          `/topic/party/${partyId}`,
+          (message: IMessage) => {
+            try {
+              const payload: ChatMessageDto = JSON.parse(message.body);
+              setMessages(prev => [...prev, payload]);
+              setTimeout(() => {
+                messagesRef.current?.scrollTo({
+                  top: messagesRef.current.scrollHeight,
+                  behavior: 'smooth'
+                });
+              }, 30);
+            } catch (err) {
+              console.error('Invalid STOMP message payload', err);
+            }
+          }
+        );
+      },
+      onStompError: (frame: IFrame) => {
+        console.error('STOMP error:', frame.headers?.['message'], frame.body);
+      },
+      onWebSocketClose: (evt: CloseEvent) => {
+        console.warn('WebSocket closed:', evt.reason || evt.code);
+      }
+    });
+
+    client.activate(); // activate() 호출 시 STOMP 연결(핸드셰이크 + CONNECT 프레임 전송) 시작
+    stompRef.current = client;
+
+    return () => {
+      try {
+        if (subscription) subscription.unsubscribe();
+      } catch {
+        // ignore
+      }
+      client.deactivate();
+    };
+  }, [partyId]);
+
   const handleSend = () => {
-    if (!text.trim()) return;
-    setMessages(s => [
-      ...s,
-      { id: String(Date.now()), author: currentUser, text: text.trim() }
+    const body = text.trim();
+    if (!body || !stompRef.current || !stompRef.current.connected) return; // 연결 체크
+
+    // 서버가 기대하는 DTO 필드명에 맞춰 전송
+    const dto: ChatMessageDto = {
+      partyId: Number(partyId),
+      content: body
+    };
+
+    // 서버의 @MessageMapping("/chat.sendMessage")와 매칭
+    stompRef.current.publish({
+      destination: '/app/chat.sendMessage',
+      body: JSON.stringify(dto)
+    });
+
+    // 서버 브로드캐스트와 중복 표시 방지
+    setMessages(prev => [
+      ...prev,
+      { ...dto, senderEmail: currentUser || 'me@local' }
     ]);
+
     setText('');
-    setTimeout(
-      () =>
-        messagesRef.current?.scrollTo({
-          top: messagesRef.current.scrollHeight
-        }),
-      50
-    );
+    setTimeout(() => {
+      messagesRef.current?.scrollTo({
+        top: messagesRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
+    }, 30);
   };
 
   if (loading) return <div>로딩 중...</div>;
@@ -104,18 +219,31 @@ export default function PartyDetailClient({ partyId }: { partyId: string }) {
     <div>
       {/* 멤버 그리드 */}
       <div className="grid grid-cols-3 gap-3 mb-4">
-        {members.map((m) => (
+        {members.map(m => (
           <div
-            key={m.id ?? m.name} // id 없을 때는 name으로 대체
+            key={m.id ?? m.name}
             className="relative rounded-lg bg-basic-white p-3 flex flex-col items-center text-center shadow-sm"
           >
             <div className="w-20 h-20 bg-gray-100 rounded-md flex items-center justify-center mb-2">
               <span className="text-base font-semibold text-gray-08">
-                {(m.name && m.name.length > 0 ? m.name.charAt(0) : '?')}
-                <br />(이미지)
+                {m.name && m.name.length > 0 ? m.name.charAt(0) : '?'}
+                <br />
+                (이미지)
               </span>
             </div>
-            <div className="text-xs text-gray-05">{m.subtitle}</div>
+            <div className="text-xs text-gray-05">
+              {/*
+                우선순위:
+                1) 멤버 객체의 title (문자열)
+                2) 멤버.id === currentUserId 이면 currentUserTitle
+                3) 없으면 '칭호 없음'
+              */}
+              {m.title
+                ? m.title
+                : (m.id && currentUserId && m.id === currentUserId)
+                ? currentUserTitle ?? '칭호 없음'
+                : '칭호 없음'}
+            </div>
             <div className="text-sm text-gray-10 font-medium">{m.name}</div>
             {m.crowned && (
               <div className="absolute left-2 top-2">
@@ -124,7 +252,6 @@ export default function PartyDetailClient({ partyId }: { partyId: string }) {
             )}
           </div>
         ))}
-        {/* 빈 슬롯 */}
         <div className="rounded-lg bg-basic-white p-3 flex items-center justify-center text-2xl text-gray-300">
           <Image src="/not.svg" alt="빈 슬롯" width={80} height={80} />
         </div>
@@ -136,9 +263,9 @@ export default function PartyDetailClient({ partyId }: { partyId: string }) {
           variant="basic"
           size="md"
           fullWidth
-          onClick={() => {
-            router.push(`/partyplan?partyId=${encodeURIComponent(partyId)}`);
-          }}
+          onClick={() =>
+            router.push(`/partyplan?partyId=${encodeURIComponent(partyId)}`)
+          }
         >
           파티 계획
         </Button>
@@ -150,19 +277,35 @@ export default function PartyDetailClient({ partyId }: { partyId: string }) {
           ref={messagesRef}
           className="h-40 overflow-auto p-2 space-y-2 scrollbar scrollbar-thin scrollbar-thumb-orange-nuts scrollbar-track-[rgba(0,0,0,0.04)]"
         >
-          {messages.map(m => {
-            const isMine = m.author === currentUser;
+          {messages.map((m, i) => {
+            const isMine =
+              !!currentUser &&
+              (m.senderEmail?.toLowerCase() === currentUser.toLowerCase() ||
+                m.senderEmail === 'me@local'); // 낙관 업데이트 구분용
+
+            // 삭제 이벤트(content=null) 시 표시 정책
+            if (m.content === null) {
+              return (
+                <div
+                  key={m.id ?? `del-${i}`}
+                  className="text-xs text-gray-500 italic"
+                >
+                  메시지(ID: {m.id ?? 'unknown'})가 삭제되었습니다.
+                </div>
+              );
+            }
+
             return (
-              <div key={m.id} className="text-sm">
+              <div key={m.id ?? i} className="text-sm">
                 <span
                   className={`font-medium ${
                     isMine ? 'text-[#E98E3E]' : 'text-gray-700'
                   }`}
                 >
-                  {isMine ? '나' : m.author} :{' '}
+                  {isMine ? '나' : m.senderEmail ?? '알 수 없음'} :{' '}
                 </span>
                 <span className={isMine ? 'text-[#E98E3E]' : 'text-gray-700'}>
-                  {m.text}
+                  {m.content}
                 </span>
               </div>
             );
@@ -170,6 +313,7 @@ export default function PartyDetailClient({ partyId }: { partyId: string }) {
         </div>
       </div>
 
+      {/* 입력창 */}
       <div className="mt-3">
         <div className="relative rounded-xl bg-basic-white focus-within:ring-2 focus-within:ring-orange-nuts">
           <div className="flex items-center gap-2 px-3 py-2">
@@ -178,16 +322,18 @@ export default function PartyDetailClient({ partyId }: { partyId: string }) {
               onChange={e => setText(e.target.value)}
               placeholder="채팅을 입력해 주세요"
               className="flex-1 bg-transparent outline-none"
-              onKeyDown={e => {
-                if (e.key === 'Enter') handleSend();
-              }}
+              onKeyDown={e => e.key === 'Enter' && handleSend()}
+              maxLength={1000} // 서버 @Size(max=1000)와 맞춤
             />
-            <button onClick={handleSend} > </button>
+            <button
+              onClick={handleSend}
+              className="text-orange-nuts font-semibold"
+              disabled={!stompRef.current || !stompRef.current.connected || text.trim() === ''}
+            >
+            </button>
           </div>
         </div>
       </div>
-
-      {/* 하단 알림 배너*/}
     </div>
   );
 }
