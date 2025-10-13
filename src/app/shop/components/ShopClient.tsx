@@ -9,7 +9,7 @@ import CategoryTabs, { Category } from './CategoryTabs';
 import ItemGrid from './ItemGrid';
 import ConfirmModal from '@/components/modal/ConfirmModal';
 import { HiOutlineRefresh } from 'react-icons/hi';
-import { Item, unequipItem } from '@/lib/api/shop/item';
+import { equipItem, Item, unequipItem } from '@/lib/api/shop/item';
 import { useRouter } from 'next/navigation';
 
 interface Props {
@@ -53,12 +53,25 @@ export default function ShopClient({ coin, initialItems, equippedItemImg, access
       : [`[${selectedItem.name}]`, '착용하시겠습니까?']);
 
   // 컨펌 확인 버튼 눌렀을 때 동작
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (!selectedItem) return;
-    if (tab === 'shop') {
-      alert(`구매 완료`);
-    } else {
-      alert(`착용 완료`);
+
+    try {
+      if (tab === 'shop') {
+        alert(`구매 완료`);
+      } else {
+        if (selectedItem.img === equippedItemImg) {
+          alert("이미 착용 중인 아이템입니다!");
+          setSelectedItem(null);
+          return;
+        }
+
+        await equipItem(accessToken!, selectedItem.id);
+        router.refresh();
+      }
+    } catch (err) {
+      console.error(err);
+      alert('아이템 착용 중 오류가 발생했습니다');
     }
     setSelectedItem(null);
   };

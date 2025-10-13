@@ -57,6 +57,24 @@ export async function getOwnedItemIds(accessToken: string) {
 }
 
 
+// 아이템 장착
+export async function equipItem(
+  accessToken: string,
+  id: number
+): Promise<void> {
+  const res = await fetch(`${BASE_URL}/api/v1/members/equip/item/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Cookie: `accessToken=${accessToken}`,
+    },
+    credentials: "include",
+  });
+
+  if (!res.ok) throw new Error("아이템 장착 실패");
+}
+
+
 // 아이템 장착 해제
 export async function unequipItem(accessToken: string): Promise<void> {
   const res = await fetch(`${BASE_URL}/api/v1/members/unequip/item`, {
