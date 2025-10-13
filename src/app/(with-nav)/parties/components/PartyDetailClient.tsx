@@ -39,7 +39,7 @@ export default function PartyDetailClient({ partyId }: { partyId: string }) {
 
       try {
         const detail = await fetchPartyDetailClient(partyId);
-        console.log('파티 상세 응답:', detail); // ← 이 줄 추가
+        console.log('파티 상세 응답:', detail);
 
         if (!mounted) return;
 

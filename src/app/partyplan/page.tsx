@@ -1,4 +1,5 @@
 'use client';
+export const dynamic = 'force-dynamic';
 import ContentWrapper from '@/components/layout/ContentWrapper';
 import Header from '@/components/layout/Header';
 import PlanToggleCard from '@/components/ui/PlanToggleCard';
