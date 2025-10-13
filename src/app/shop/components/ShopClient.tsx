@@ -9,20 +9,23 @@ import CategoryTabs, { Category } from './CategoryTabs';
 import ItemGrid from './ItemGrid';
 import ConfirmModal from '@/components/modal/ConfirmModal';
 import { HiOutlineRefresh } from 'react-icons/hi';
-import { Item } from '@/lib/api/shop/item';
+import { Item, unequipItem } from '@/lib/api/shop/item';
+import { useRouter } from 'next/navigation';
 
 interface Props {
   coin: number; // 서버에서 받은 코인
   initialItems: Item[]; // 서버에서 받은 아이템 리스트
   equippedItemImg?: string | null;
+  accessToken?: string;
 }
 
-export default function ShopClient({ coin, initialItems, equippedItemImg }: Props) {
+export default function ShopClient({ coin, initialItems, equippedItemImg, accessToken }: Props) {
   const [tab, setTab] = useState<'shop' | 'closet'>('shop'); // 탭 상태 관리
   const [category, setCategory] = useState<Category>('all'); // 카테고리 상태 관리
   const [selectedItem, setSelectedItem] = useState<Item | null>(null); // 선택한 아이템 상태 관리
   const [items, setItems] = useState<Item[]>(initialItems);
   const listRef = useRef<HTMLDivElement | null>(null); // 스크롤 상태 관리
+  const router = useRouter();
 
   // 아이템 필터링
   const filteredItems = items.filter(
@@ -60,6 +63,18 @@ export default function ShopClient({ coin, initialItems, equippedItemImg }: Prop
     setSelectedItem(null);
   };
 
+  // 리셋 버튼 클릭 시 (아이템 해제)
+  const handleReset = async () => {
+    try {
+      await unequipItem(accessToken!);
+      alert('아이템이 기본 상태로 되돌아갔습니다');
+      router.refresh();
+    } catch (err) {
+      console.error(err);
+      alert('해제 중 오류가 발생했습니다');
+    }
+  };
+
   return (
     <div className="flex flex-col h-screen overflow-hidden pb-14">
       {/* 헤더 영역 */}
@@ -83,10 +98,14 @@ export default function ShopClient({ coin, initialItems, equippedItemImg }: Prop
           priority
           className="absolute -top-1/2 left-1/2 -translate-x-1/2 z-10"
         />
+        {/* 리셋 버튼 */}
         {tab === 'closet' && (
           <button
             type="button"
-            className="cursor-pointer rounded-full bg-basic-white h-10 w-10"
+            onClick={handleReset}
+            disabled={!equippedItemImg}
+            className={`rounded-full bg-basic-white h-10 w-10 
+              ${!equippedItemImg ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
           >
             <div className='text-basic-black flex flex-col items-center justify-center'>
               <HiOutlineRefresh size={20} />

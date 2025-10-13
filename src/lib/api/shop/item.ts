@@ -58,7 +58,7 @@ export async function getOwnedItemIds(accessToken: string) {
 
 
 // 아이템 장착 해제
-export async function unequipTitle(accessToken: string): Promise<void> {
+export async function unequipItem(accessToken: string): Promise<void> {
   const res = await fetch(`${BASE_URL}/api/v1/members/unequip/item`, {
     method: "PUT",
     headers: {
