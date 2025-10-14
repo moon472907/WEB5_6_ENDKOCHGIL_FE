@@ -1,11 +1,12 @@
 'use client';
+
 import ContentWrapper from '@/components/layout/ContentWrapper';
 import ProgressCard from './components/ProgressCard';
 import Button from '@/components/ui/Button';
 import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
-import { fetchMyPartiesWithStatus } from '@/lib/api/parties/parties';
 import { BASE_URL } from '@/lib/api/config';
+import { fetchMyPartiesServer } from '@/lib/api/parties/myparties';
 
 export default function Page() {
   type Party = {
@@ -14,67 +15,121 @@ export default function Page() {
     category?: string;
     missionTitle?: string;
     missionIsCompleted?: boolean;
-    current?: number;
+
+    /** 서버에서 계산해 주는 퍼센트 */
+    myProgressRate?: number; // 0..100
+
+    /** UI용(ExperienceBar) */
+    current?: number; // 0..100
+    max?: number; // 100
+
     currentMembers?: number;
-    max?: number;
     maxMembers?: number;
     myStatus?: 'PENDING' | 'ACCEPTED' | 'COMPLETED' | 'LEFT';
     members?: { id?: number; name?: string; status?: string }[];
   };
 
+  // tasks/today 엔드포인트에서 올 수 있는 항목 타입
+  type TaskTodayItem = {
+    title?: string | null;
+    taskTitle?: string | null;
+    missionTitle?: string | null;
+  };
+
   const [myParties, setMyParties] = useState<Party[]>([]);
   const [loading, setLoading] = useState(true);
+  /** 진행중=ACCEPTED, 완료=COMPLETED|LEFT (서버가 이미 필터해서 줌) */
   const [tab, setTab] = useState<'ongoing' | 'done'>('ongoing');
 
-  // 오늘의 태스크 매핑: missionTitle -> first task title
-  const [missionTaskMap, setMissionTaskMap] = useState<Map<string, string>>(new Map());
+  // 오늘의 태스크 매핑: missionTitle -> first task title (서브타이틀은 계속 사용)
+  const [missionTaskMap, setMissionTaskMap] = useState<Map<string, string>>(
+    new Map()
+  );
   const [defaultTaskTitle, setDefaultTaskTitle] = useState<string | null>(null);
 
+  /** 탭 변경 시 서버에서 myStatus 기준으로 이미 필터된 목록을 받음 */
   useEffect(() => {
+    const ctrl = new AbortController();
     let mounted = true;
+
     (async () => {
       setLoading(true);
       try {
-        // 탭에 따라 서버-결과를 members.status 기준으로 필터한 리스트를 받음
-        const list = await fetchMyPartiesWithStatus(tab === 'ongoing' ? 'ongoing' : 'done');
+        const { list } = await fetchMyPartiesServer(
+          tab === 'ongoing' ? 'ongoing' : 'done',
+          { page: 0, size: 100 },
+          ctrl.signal
+        );
         if (!mounted) return;
-        setMyParties(list as unknown as Party[]);
-      } catch (e) {
-        console.error('내 파티 조회 실패', e);
+
+        // 서버가 current/max/myProgressRate를 보장 → 가벼운 안전 보정만
+        const normalized = (list ?? []).map(p => {
+          const rate = Number(p.myProgressRate ?? p.current ?? 0);
+          const safeRate = Number.isFinite(rate)
+            ? Math.max(0, Math.min(100, Math.round(rate)))
+            : 0;
+          return {
+            ...p,
+            myProgressRate: safeRate,
+            current: safeRate,
+            max: 100
+          };
+        });
+
+        setMyParties(normalized as Party[]);
+      } catch (err: unknown) {
+        if (
+          typeof DOMException !== 'undefined' &&
+          err instanceof DOMException &&
+          err.name === 'AbortError'
+        ) {
+          return;
+        }
+        if (typeof err === 'object' && err !== null) {
+          const name = (err as { name?: unknown }).name;
+          if (typeof name === 'string' && name === 'AbortError') return;
+        }
+        console.error('내 파티 조회 실패', err);
         if (mounted) setMyParties([]);
       } finally {
         if (mounted) setLoading(false);
       }
     })();
+
     return () => {
       mounted = false;
+      ctrl.abort();
     };
   }, [tab]);
 
-  // 오늘의 태스크를 한 번만 불러와서 missionTitle 기준으로 매핑
+  /** 오늘의 태스크는 한 번만 가져와서 missionTitle -> taskTitle 매핑 (서브타이틀 용) */
   useEffect(() => {
     let mounted = true;
     (async () => {
       try {
-        const res = await fetch(`${BASE_URL}/api/v1/tasks/today`, {
+        const base = (BASE_URL ?? '').replace(/\/$/, '');
+        const res = await fetch(`${base}/api/v1/tasks/today`, {
           credentials: 'include',
           headers: { Accept: 'application/json' }
         });
         if (!res.ok) return;
         const json: unknown = await res.json().catch(() => null);
-        const content = (json && typeof json === 'object' && 'content' in (json as Record<string, unknown>))
-          ? (json as Record<string, unknown>).content
-          : json;
-        const arr = Array.isArray(content) ? content : (content ? [content] : []);
+        const content =
+          json &&
+          typeof json === 'object' &&
+          'content' in (json as Record<string, unknown>)
+            ? (json as Record<string, unknown>).content
+            : json;
+
+        const arr = Array.isArray(content) ? content : content ? [content] : [];
         const map = new Map<string, string>();
         let firstTitle: string | null = null;
 
         for (const item of arr) {
           if (!item || typeof item !== 'object') continue;
-          const it = item as Record<string, unknown>;
-          const title = (it.title ?? it['taskTitle'] ?? '') as string;
-          const mTitle = (it.missionTitle ?? it['missionTitle'] ?? '') as string;
-
+          const t = item as TaskTodayItem;
+          const title = (t.title ?? t.taskTitle ?? '') as string;
+          const mTitle = (t.missionTitle ?? '') as string;
           if (!firstTitle && title) firstTitle = title;
           if (mTitle && title && !map.has(mTitle)) {
             map.set(mTitle, title);
@@ -86,7 +141,6 @@ export default function Page() {
           setDefaultTaskTitle(firstTitle);
         }
       } catch (e) {
-        // 실패 시 무시 (default 유지)
         console.error('오늘의 태스크 조회 실패', e);
       }
     })();
@@ -96,26 +150,23 @@ export default function Page() {
     };
   }, []);
 
-  // 이제 filtered는 이미 탭 기준으로 필터된 myParties 사용
   const filtered = myParties;
 
+  /** 평균 달성률 (myProgressRate 기반) */
   const average = useMemo(() => {
     if (!filtered.length) return 0;
     let sum = 0;
-    let count = 0;
     for (const it of filtered) {
-      const max = it.max ?? it.maxMembers ?? 100;
-      const current = it.current ?? it.currentMembers ?? 0;
-      if (max > 0) {
-        sum += Math.min(1, Math.max(0, current / max));
-        count++;
-      }
+      const percent = Number(it.myProgressRate ?? it.current ?? 0);
+      const safe = Number.isFinite(percent)
+        ? Math.max(0, Math.min(100, percent))
+        : 0;
+      sum += safe / 100;
     }
-    return count ? Math.round((sum / count) * 100) : 0;
+    return Math.round((sum / filtered.length) * 100);
   }, [filtered]);
 
   const getSubtitleForParty = (p: Party) => {
-    // 우선 missionTitle로 매핑, 없으면 기본 오늘의 태스크, 없으면 빈 문자열
     const missionTitle = p.missionTitle ?? '';
     return missionTaskMap.get(missionTitle) ?? defaultTaskTitle ?? '';
   };
@@ -196,8 +247,8 @@ export default function Page() {
                 title={i.name}
                 tag={i.category}
                 subtitle={getSubtitleForParty(i)}
-                current={i.current ?? i.currentMembers ?? 0}
-                max={i.max ?? i.maxMembers ?? 100}
+                current={i.current ?? i.myProgressRate ?? 0}
+                max={i.max ?? 100}
                 compact={tab === 'done'}
               />
             ))
