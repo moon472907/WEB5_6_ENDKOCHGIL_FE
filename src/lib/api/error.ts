@@ -1,5 +1,3 @@
-import { redirect } from "next/navigation";
-
 /**
  * 공통 인증 에러 핸들러
  * - 401 → 로그인 리디렉션
@@ -8,7 +6,7 @@ import { redirect } from "next/navigation";
 export async function handleAuthError(res: Response, context?: string) {
   if (res.status === 401) {
     console.warn('accessToken 만료됨');
-    redirect('/login');
+    throw new Error('UNAUTHORIZED');
   }
 
   let errorMessage = `${context || "API 요청 실패"}: ${res.status}`;
