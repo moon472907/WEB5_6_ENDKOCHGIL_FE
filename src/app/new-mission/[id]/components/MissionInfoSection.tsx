@@ -1,7 +1,7 @@
 'use client';
 
 import Tooltip from '@/components/ui/Tooltip';
-import Image from 'next/image';
+import { MdInfoOutline } from 'react-icons/md';
 
 export default function MissionInfoSection() {
   return (
@@ -18,12 +18,9 @@ export default function MissionInfoSection() {
           }
           position="bottom"
         >
-          <Image
-            src="/images/info.png"
-            alt="생성 계획 도움말"
-            width={20}
-            height={20}
-            className="w-[20px] h-[20px] object-contain cursor-pointer"
+          <MdInfoOutline
+            size={20}
+            className="text-orange-main cursor-pointer"
           />
         </Tooltip>
       </div>

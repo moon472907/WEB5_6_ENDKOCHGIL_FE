@@ -9,11 +9,17 @@ interface HeaderSectionProps {
     xp: number;
     money: number;
     xpReq: number;
-  };
+  } | null;
   accessToken?: string;
 }
 
 export default function HeaderSection({ profile, accessToken }: HeaderSectionProps) {
+
+  if (!profile) {
+    console.warn('HeaderSection: profile이 없습니다.');
+    return null;
+  }
+
   return (
     <section className="flex flex-col bg-basic-white py-4 px-5 gap-2 h-[180px]">
       <div className="flex items-center justify-between gap-5">

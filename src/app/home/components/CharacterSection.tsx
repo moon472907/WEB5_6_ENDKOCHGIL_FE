@@ -1,14 +1,18 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
-export default function CharacterSection() {
+interface Props {
+  equippedItemImg?: string | null;
+}
+
+export default function CharacterSection({ equippedItemImg }: Props) {
   return (
     <section className="flex bg-nuts-floor px-5 items-center justify-end relative h-[120px]">
       <Image
-        src="/images/nuts-default.png"
+        src={equippedItemImg ?? '/images/nuts-default.png'}
         alt="너츠"
-        width={110}
-        height={165}
+        width={150}
+        height={150}
         className="absolute -top-1/2 left-1/2 -translate-x-1/2 z-10"
       />
       <Link href="/shop" className="cursor-pointer">
