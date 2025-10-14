@@ -1,6 +1,12 @@
 import ProfileForm from "@/components/profile/ProfileForm";
 import { getMyInfo } from "@/lib/api/member";
+import { Metadata } from "next";
 import { cookies } from "next/headers";
+
+export const metadata: Metadata = {
+  title: "프로필 수정 - NuTree",
+  description: "나의 정보를 수정하고 프로필을 업데이트해보세요."
+};
 
 export default async function Page() {
   const cookieStore = await cookies();

@@ -3,6 +3,12 @@ import { redirect } from "next/navigation";
 import { getMyInfo } from '@/lib/api/member';
 import { getAllItems, getOwnedItemIds } from '@/lib/api/shop/item';
 import ShopClient from './components/ShopClient';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: '꾸미기 - NuTree',
+  description: '나만의 개성을 담아 너츠를 꾸며보세요.'
+};
 
 export default async function Page() {
   try {

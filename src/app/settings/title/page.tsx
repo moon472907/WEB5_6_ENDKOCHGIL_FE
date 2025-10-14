@@ -3,6 +3,12 @@ import { redirect } from "next/navigation";
 import { getAllTitles, getMyTitles } from "@/lib/api/title";
 import { getMyInfo } from "@/lib/api/member";
 import TitleClient from "./components/TitleClient";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "칭호 수정 - NuTree",
+  description: "획득한 칭호를 확인하고 원하는 칭호로 설정해보세요."
+};
 
 export default async function TitlePage() {
   try {
