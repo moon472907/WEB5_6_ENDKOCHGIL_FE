@@ -34,7 +34,9 @@ export async function getTodayTask(
       throw new Error('API_ERROR');
     }
 
+    
     const data = await res.json();
+    console.log("오늘의 테스크 = ", data);
     return data?.content ?? [];
   } catch (error) {
     console.error('[getTodayTask] 서버 오류:', error);
@@ -43,6 +45,30 @@ export async function getTodayTask(
     }
     throw new Error('API_ERROR');
   }
+}
+
+/**
+ * 클라이언트 전용 오늘의 테스크 리스트 조회 API
+ * accessToken 전달 받지 않음
+ */
+export async function getTodayTaskClient(
+): Promise<Task[]> {
+
+  const res = await fetch(`${BASE_URL}/api/v1/tasks/today`, {
+    method: 'GET',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  });
+
+  if (!res.ok) {
+    await handleAuthError(res, '오늘의 테스크 리스트 조회 실패');
+    return [];
+  }
+
+  const data = await res.json();
+  return data?.content ?? [];
 }
 
 /**
