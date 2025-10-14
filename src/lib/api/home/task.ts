@@ -3,7 +3,6 @@ import {
   TaskCompletion,
   UpdateTaskCompletionBody
 } from '@/app/home/types/task';
-import { redirect } from 'next/navigation';
 import { BASE_URL } from '../config';
 import { handleAuthError } from '../error';
 
@@ -17,7 +16,7 @@ export async function getTodayTask(
 ): Promise<Task[]> {
   if (!accessToken) {
     console.warn('accessToken 없음');
-    redirect('/login');
+    throw new Error('UNAUTHORIZED');
   }
 
   try {
@@ -32,14 +31,17 @@ export async function getTodayTask(
 
     if (!res.ok) {
       await handleAuthError(res, '오늘의 테스크 리스트 조회 실패');
-      return [];
+      throw new Error('API_ERROR');
     }
 
     const data = await res.json();
     return data?.content ?? [];
   } catch (error) {
     console.error('[getTodayTask] 서버 오류:', error);
-    return [];
+    if (error instanceof Error && error.message === 'UNAUTHORIZED') {
+      throw error;
+    }
+    throw new Error('API_ERROR');
   }
 }
 
