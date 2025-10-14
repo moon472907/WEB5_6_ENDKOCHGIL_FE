@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { Item } from '../items';
+import { Item } from '@/lib/api/shop/item';
 
 interface Props {
   items: Item[];
