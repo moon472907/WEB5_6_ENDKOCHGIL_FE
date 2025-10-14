@@ -8,7 +8,7 @@ import { ApiResponse } from "@/@types/global";
  * @returns Promise<Notification[]>
  */
 export async function getAllNotifications(accessToken?: string):Promise<ApiResponse<Notification[]>> {
-  const res = await fetch(`${BASE_URL}/api/v1/notification`, {
+  const res = await fetch(`${BASE_URL}/api/v1/notification/me`, {
     method: 'GET',
     credentials: 'include',
     headers: {
