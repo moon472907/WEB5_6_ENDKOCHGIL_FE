@@ -13,8 +13,10 @@ export default async function Home() {
   const accessToken = (await cookieStore).get('accessToken')?.value;
 
   try { 
-    const tasks = await getTodayTask(accessToken);
-    const profile = await getMyInfo(accessToken);
+    const [tasks, profile] = await Promise.all([
+      getTodayTask(accessToken),
+      getMyInfo(accessToken),
+    ]);
     
     if (process.env.NODE_ENV === 'development') {
       await setDevTime('2025-10-13');
