@@ -9,6 +9,8 @@ import { fetchPartyDetailClient } from '@/lib/api/parties/parties';
 import { getMyInfo } from '@/lib/api/member';
 import { useRouter } from 'next/navigation';
 import PartyChat from '@/app/partydetail/components/partyChat';
+import PartyRequests from '@/app/partydetail/[id]/components/partyRequests';
+import PartyInvite from '@/app/partydetail/[id]/components/PartyInvite';
 
 type Member = {
   id?: number;
@@ -37,6 +39,9 @@ export default function PartyDetailClient({ partyId }: { partyId: string }) {
 
   // 설정 모달 열림 상태
   const [settingOpen, setSettingOpen] = useState(false);
+  // 신청/초대 관리 모달 상태
+  const [manageOpen, setManageOpen] = useState(false);
+  const [manageTab, setManageTab] = useState<'requests' | 'invite'>('requests');
 
   // 1) 파티 상세 + 멤버
   useEffect(() => {
@@ -161,6 +166,23 @@ export default function PartyDetailClient({ partyId }: { partyId: string }) {
         </Button>
       </div>
 
+      {/* 신청/초대 관리 버튼 (리더 전용) */}
+      {currentUserId !== null && leaderId !== null && currentUserId === leaderId && (
+        <div className="mb-4">
+          <Button
+            variant="basic"
+            size="md"
+            fullWidth
+            onClick={() => {
+              setManageTab('requests');
+              setManageOpen(true);
+            }}
+          >
+            신청/초대 관리
+          </Button>
+        </div>
+      )}
+
       {/* 설정 모달 */}
       <BaseModal isOpen={settingOpen} onClose={() => setSettingOpen(false)}>
         <PartySetting
@@ -170,6 +192,45 @@ export default function PartyDetailClient({ partyId }: { partyId: string }) {
           initialIsPublic={partyIsPublic}
           isLeader={currentUserId !== null && leaderId !== null && currentUserId === leaderId}
         />
+      </BaseModal>
+
+      {/* 신청/초대 관리 모달 */}
+      <BaseModal isOpen={manageOpen} onClose={() => setManageOpen(false)}>
+        <div className="w-[360px] max-w-full space-y-3">
+          <h3 className="text-lg font-semibold">신청/초대 관리</h3>
+          {/* 탭 전환 버튼 */}
+          <div className="grid grid-cols-2 rounded-xl bg-gray-100 p-1">
+            <Button
+              fullWidth
+              size="md"
+              variant={manageTab === 'requests' ? 'basic' : 'unselected'}
+              onClick={() => setManageTab('requests')}
+            >
+              신청 목록
+            </Button>
+            <Button
+              fullWidth
+              size="md"
+              variant={manageTab === 'invite' ? 'basic' : 'unselected'}
+              onClick={() => setManageTab('invite')}
+            >
+              초대
+            </Button>
+          </div>
+
+          {/* 신청 목록 */}
+          {manageTab === 'requests' && (
+            <PartyRequests partyId={partyId} />
+          )}
+
+          {/* 초대 */}
+          {manageTab === 'invite' && (
+            <PartyInvite
+              partyId={partyId}
+              onInvitedAction={() => setManageTab('requests')} // 초대 후 목록 탭으로 전환(선택)
+            />
+          )}
+        </div>
       </BaseModal>
 
       <PartyChat
