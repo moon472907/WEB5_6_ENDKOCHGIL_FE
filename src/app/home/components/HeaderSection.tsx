@@ -27,7 +27,7 @@ export default function HeaderSection({ profile, accessToken }: HeaderSectionPro
           <Image src="/images/acorn.svg" alt="도토리" width={30} height={30} />
           <div className="flex gap-2 items-center justify-between w-full">
             <span className="font-medium text-sm">Lv.{profile.level}</span>
-            <ExperienceBar current={profile.xp} max={profile.xpReq} />
+            <ExperienceBar current={profile.xp} max={profile.xpReq} className='max-w-[408px]' />
           </div>
         </div>
 

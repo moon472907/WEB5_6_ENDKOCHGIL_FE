@@ -11,6 +11,22 @@ export default function MissionCard({
   task,
   onStatusChange
 }: MissionCardProps) {
+
+const isSoloMission = !task.partyCompletion;
+console.log("isSoloMission = ", isSoloMission);
+
+
+  const completedMembers = isSoloMission
+    ? task.status === 'COMPLETED'
+      ? 1
+      : 0
+    : task.partyCompletion.completedMembers;
+
+  const totalMembers = isSoloMission
+    ? 1
+    : task.partyCompletion.totalMembers;
+
+
   return (
     <div className="flex flex-col gap-7 bg-white rounded-3xl shadow-md px-5 py-4">
       <div className="flex flex-col gap-3">
@@ -18,8 +34,8 @@ export default function MissionCard({
         <div className="flex gap-1">
           <MdPerson size={20} className="text-[#434343]" />
           <p className="text-sm font-medium text-gray-04">
-            {task.partyCompletion?.completedMembers}/
-            {task.partyCompletion?.totalMembers}명 참가중
+            {completedMembers}/
+            {totalMembers}명 참가중
           </p>
         </div>
       </div>
