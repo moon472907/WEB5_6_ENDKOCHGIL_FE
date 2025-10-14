@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
+import PartySetting from '@/app/partydetail/[id]/components/PartySetting';
+import BaseModal from '@/components/modal/BaseModal';
 import Image from 'next/image';
 import Button from '@/components/ui/Button';
 import { fetchPartyDetailClient } from '@/lib/api/parties/parties';
@@ -34,15 +36,23 @@ export default function PartyDetailClient({ partyId }: { partyId: string }) {
   const [text, setText] = useState('');
   const [currentUser, setCurrentUser] = useState<string>('');
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const [leaderId, setLeaderId] = useState<number | null>(null); // 추가
   const [currentUserTitle, setCurrentUserTitle] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // 새: 파티 기본 정보 (PartySetting 전달용)
+  const [partyName, setPartyName] = useState<string>('');
+  const [partyMaxMembers, setPartyMaxMembers] = useState<number>(4);
+  const [partyIsPublic, setPartyIsPublic] = useState<boolean>(true);
+
+  // 새: 설정 모달 열림 상태
+  const [settingOpen, setSettingOpen] = useState(false);
+
   const messagesRef = useRef<HTMLDivElement | null>(null);
 
-  // STOMP 클라이언트 ref
+  // STOMP client reference (활성화된 Client를 보관)
   const stompRef = useRef<Client | null>(null);
-  // console.log(stompRef.current);
 
   // 1) 파티 상세 + 멤버
   useEffect(() => {
@@ -51,25 +61,33 @@ export default function PartyDetailClient({ partyId }: { partyId: string }) {
       setLoading(true);
       setError(null);
       try {
-        const detail = await fetchPartyDetailClient(partyId);
+        const detail = await fetchPartyDetailClient(partyId); // 가정된 함수명
         if (!mounted) return;
-        const leaderId = detail.leaderId;
+
+        // leaderId 저장 (숫자 타입으로)
+        const parsedLeaderId = typeof detail.leaderId === 'number' ? detail.leaderId : Number(detail.leaderId);
+        setLeaderId(Number.isFinite(parsedLeaderId) ? parsedLeaderId : null);
+
+        setPartyName(String(detail.name ?? ''));
+        setPartyMaxMembers(typeof detail.maxMembers === 'number' ? detail.maxMembers : 4);
+        setPartyIsPublic(Boolean(detail.isPublic));
+
+        // members 매핑
         const rawMembers = (detail.members ?? []) as Array<Record<string, unknown>>;
         const mapped: Member[] = rawMembers.map((m) => {
-          const id = typeof m['id'] === 'number' ? (m['id'] as number) : undefined;
+          const id = typeof m['id'] === 'number' ? (m['id'] as number) : Number(m['id']);
           const name = typeof m['name'] === 'string' ? (m['name'] as string) : `회원 ${id ?? ''}`;
-          const subtitle = typeof m['email'] === 'string' ? (m['email'] as string) : undefined;
-          const title = typeof m['title'] === 'string' ? (m['title'] as string) : undefined;
           return {
             id,
             name,
-            subtitle,
-            title,
-            crowned: leaderId === id
+            subtitle: typeof m['email'] === 'string' ? (m['email'] as string) : undefined,
+            title: undefined,
+            crowned: parsedLeaderId === id
           };
         });
         setMembers(mapped);
-      } catch {
+      } catch (err) {
+        console.error(err);
         setError('파티 상세 정보를 불러오는 데 실패했습니다.');
       } finally {
         if (mounted) setLoading(false);
@@ -80,7 +98,7 @@ export default function PartyDetailClient({ partyId }: { partyId: string }) {
     };
   }, [partyId]);
 
-  // 2) 내 정보(이름/이메일)
+  // 2) 내 정보(이름/이메일/아이디) — currentUserId 설정
   useEffect(() => {
     (async () => {
       try {
@@ -88,13 +106,16 @@ export default function PartyDetailClient({ partyId }: { partyId: string }) {
         setCurrentUser(me?.name ?? me?.email ?? '');
         setCurrentUserId(typeof me?.id === 'number' ? me.id : null);
         setCurrentUserTitle(me?.title ?? null); // 장착된 칭호
-
-        // (참고) getMyTitles 사용 불필요하면 호출하지 않음 — title.ts는 수정 금지 조건으로 서버에서 재사용 권장
       } catch (err) {
-        console.error('❌ [ERROR] 내 정보 조회 실패:', err);
+        console.error('[ERROR] 내 정보 조회 실패:', err);
       }
     })();
   }, []);
+
+  // leaderId / currentUserId 확인
+  useEffect(() => {
+    console.log('leaderId, currentUserId =>', leaderId, currentUserId);
+  }, [leaderId, currentUserId]);
 
   // 3) 기존 채팅 히스토리 (HTTP)
   useEffect(() => {
@@ -127,12 +148,11 @@ export default function PartyDetailClient({ partyId }: { partyId: string }) {
     }
 
     const base = API_BASE_URL.replace(/\/$/, '');
-    // SockJS는 HTTP/HTTPS 엔드포인트를 사용하므로 http(s) 그대로 사용
     const sockEndpoint = `${base}/ws/chat`;
 
     let subscription: StompSubscription | null = null;
     const client = new Client({
-      webSocketFactory: () => new SockJS(sockEndpoint), //  SockJS가 HTTP/S 핸드셰이크 시작
+      webSocketFactory: () => new SockJS(sockEndpoint),
       reconnectDelay: 5000,
       heartbeatIncoming: 10000,
       heartbeatOutgoing: 10000,
@@ -168,7 +188,7 @@ export default function PartyDetailClient({ partyId }: { partyId: string }) {
       }
     });
 
-    client.activate(); // activate() 호출 시 STOMP 연결(핸드셰이크 + CONNECT 프레임 전송) 시작
+    client.activate();
     stompRef.current = client;
 
     return () => {
@@ -178,6 +198,7 @@ export default function PartyDetailClient({ partyId }: { partyId: string }) {
         // ignore
       }
       client.deactivate();
+      stompRef.current = null;
     };
   }, [partyId]);
 
@@ -240,7 +261,7 @@ export default function PartyDetailClient({ partyId }: { partyId: string }) {
               */}
               {m.title
                 ? m.title
-                : (m.id && currentUserId && m.id === currentUserId)
+                : m.id && currentUserId && m.id === currentUserId
                 ? currentUserTitle ?? '칭호 없음'
                 : '칭호 없음'}
             </div>
@@ -270,6 +291,30 @@ export default function PartyDetailClient({ partyId }: { partyId: string }) {
           파티 계획
         </Button>
       </div>
+
+      {/* 파티 설정 버튼 (모달로 열기) */}
+      <div className="mb-4">
+        <Button
+          variant="basic"
+          size="md"
+          fullWidth
+          onClick={() => setSettingOpen(true)}
+        >
+          파티 설정
+        </Button>
+      </div>
+
+      {/* 설정 모달: PartySetting을 modal 내부에 렌더링 */}
+      <BaseModal isOpen={settingOpen} onClose={() => setSettingOpen(false)}>
+        <PartySetting
+          partyId={partyId}
+          initialName={partyName}
+          initialMaxMembers={partyMaxMembers}
+          initialIsPublic={partyIsPublic}
+          // 리더 여부 전달: 숫자 비교로 정확히 체크
+          isLeader={currentUserId !== null && leaderId !== null && currentUserId === leaderId}
+        />
+      </BaseModal>
 
       {/* 채팅 박스 */}
       <div className="rounded-xl bg-basic-white p-3">
@@ -328,9 +373,12 @@ export default function PartyDetailClient({ partyId }: { partyId: string }) {
             <button
               onClick={handleSend}
               className="text-orange-nuts font-semibold"
-              disabled={!stompRef.current || !stompRef.current.connected || text.trim() === ''}
-            >
-            </button>
+              disabled={
+                !stompRef.current ||
+                !stompRef.current.connected ||
+                text.trim() === ''
+              }
+            ></button>
           </div>
         </div>
       </div>
