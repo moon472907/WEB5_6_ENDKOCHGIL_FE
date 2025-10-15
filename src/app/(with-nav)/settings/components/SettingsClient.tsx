@@ -69,12 +69,12 @@ export default function SettingsClient({ profile }: Props) {
             <span className="text-base font-semibold text-button-point">프로필</span>
           </div>
           <div className="flex flex-col gap-2.5">
-            <Link href="/settings/profile">
+            <Link href="/settings/profile" tabIndex={-1}>
               <SettingButton>
                 프로필 수정
               </SettingButton>
             </Link>
-            <Link href="/settings/title">
+            <Link href="/settings/title" tabIndex={-1}>
               <SettingButton>
                 칭호 수정
               </SettingButton>
@@ -89,7 +89,7 @@ export default function SettingsClient({ profile }: Props) {
             <span className="text-base font-semibold text-button-point">지원</span>
           </div>
           <div className="flex flex-col gap-2.5">
-            <Link href="/settings/notice">
+            <Link href="/settings/notice" tabIndex={-1}>
               <SettingButton>
                 공지사항
               </SettingButton>
@@ -98,6 +98,7 @@ export default function SettingsClient({ profile }: Props) {
               href="https://github.com/prgrms-web-devcourse-final-project/WEB5_6_ENDKOCHGIL_FE/discussions"
               target="_blank"
               rel="noopener noreferrer"
+              tabIndex={-1}
             >
               <SettingButton>
                 문의 / 버그 / FAQ
