@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import PartySetting from '@/app/partydetail/[id]/components/PartySetting';
 import BaseModal from '@/components/modal/BaseModal';
 import Image from 'next/image';
@@ -54,8 +54,12 @@ export default function PartyDetailClient({ partyId }: { partyId: string }) {
   const [manageOpen, setManageOpen] = useState(false);
   const [manageTab, setManageTab] = useState<'requests' | 'invite'>('requests');
 
+  const pollingInFlight = useRef(false);
+
   const loadPartyDetail = useCallback(
     async (opts?: { silent?: boolean }) => {
+      if (pollingInFlight.current) return;
+      pollingInFlight.current = true;
       const silent = opts?.silent === true;
       let mounted = true;
       try {
@@ -131,6 +135,7 @@ export default function PartyDetailClient({ partyId }: { partyId: string }) {
         console.error(err);
         if (!silent) setError('파티 상세 정보를 불러오는 데 실패했습니다.');
       } finally {
+        pollingInFlight.current = false;
         if (!silent) setLoading(false);
       }
       return () => {
