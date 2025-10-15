@@ -103,19 +103,14 @@ export default function PartyDetailClient({ partyId }: { partyId: string }) {
             const itemId =
               typeof r.id === 'number'
                 ? r.id
-                : typeof r.id === 'string' &&
-                  r.id.trim() !== '' &&
-                  !Number.isNaN(Number(r.id))
+                : typeof r.id === 'string' && r.id.trim() !== '' && !Number.isNaN(Number(r.id))
                 ? Number(r.id)
                 : undefined;
-            const itemName =
-              typeof r.name === 'string' ? (r.name as string) : undefined;
+            const itemName = typeof r.name === 'string' ? (r.name as string) : undefined;
             const iconUrl =
-              r.iconUrl === null
-                ? null
-                : typeof r.iconUrl === 'string'
-                ? (r.iconUrl as string)
-                : undefined;
+              r.iconUrl === null ? null : typeof r.iconUrl === 'string' ? (r.iconUrl as string) : undefined;
+
+            // 아이템 객체 생성
             item = { id: itemId, name: itemName, iconUrl };
           }
 
