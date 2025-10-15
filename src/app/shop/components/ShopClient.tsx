@@ -8,6 +8,7 @@ import TabBar from './TabBar';
 import CategoryTabs, { Category } from './CategoryTabs';
 import ItemGrid from './ItemGrid';
 import ConfirmModal from '@/components/modal/ConfirmModal';
+import AlertModal from '@/components/modal/AlertModal';
 import { HiOutlineRefresh } from 'react-icons/hi';
 import { buyItem, equipItem, Item, unequipItem } from '@/lib/api/shop/item';
 import { useRouter } from 'next/navigation';
@@ -24,6 +25,8 @@ export default function ShopClient({ coin, initialItems, equippedItemImg, access
   const [category, setCategory] = useState<Category>('all'); // 카테고리 상태 관리
   const [selectedItem, setSelectedItem] = useState<Item | null>(null); // 선택한 아이템 상태 관리
   const [items, setItems] = useState<Item[]>(initialItems);
+  const [alertOpen, setAlertOpen] = useState(false); // AlertModal 상태
+  const [alertMessage, setAlertMessage] = useState(''); // AlertModal 문구
   const listRef = useRef<HTMLDivElement | null>(null); // 스크롤 상태 관리
   const router = useRouter();
 
@@ -52,6 +55,12 @@ export default function ShopClient({ coin, initialItems, equippedItemImg, access
       ? [`[${selectedItem.name}]`, '구매하시겠습니까?']
       : [`[${selectedItem.name}]`, '착용하시겠습니까?']);
 
+  // AlertModal 닫힐 때 새로고침
+  const handleAlertConfirm = () => {
+    setAlertOpen(false);
+    router.refresh();
+  };
+
   // 컨펌 확인 버튼 눌렀을 때 동작
   const handleConfirm = async () => {
     if (!selectedItem) return;
@@ -59,8 +68,8 @@ export default function ShopClient({ coin, initialItems, equippedItemImg, access
     try {
       if (tab === 'shop') {
         await buyItem(accessToken!, selectedItem.id);
-        alert(`"${selectedItem.name}" 아이템을 구매했습니다!`);
-        router.refresh();
+        setAlertMessage(`"${selectedItem.name}" 아이템을 구매했습니다`);
+        setAlertOpen(true);
         
         setItems(prev =>
           prev.map(item =>
@@ -70,24 +79,26 @@ export default function ShopClient({ coin, initialItems, equippedItemImg, access
 
       } else {
         if (selectedItem.img === equippedItemImg) {
-          alert("이미 착용 중인 아이템입니다!");
+          setAlertMessage('이미 착용 중인 아이템입니다');
+          setAlertOpen(true);
           setSelectedItem(null);
           return;
         }
 
         await equipItem(accessToken!, selectedItem.id);
-        alert(`"${selectedItem.name}" 아이템을 착용했습니다!`);
-        router.refresh();
+        setAlertMessage(`"${selectedItem.name}" 아이템을 착용했습니다`);
+        setAlertOpen(true);
       }
     } catch (err) {
       console.error(err);
       
       if (err instanceof Error) {
         if (err.message === 'NOT_ENOUGH_MONEY'){
-          alert('코인이 부족합니다.')
+          setAlertMessage('코인이 부족합니다');
         } else {
-          alert(tab === 'shop' ? '아이템 구매 중 오류가 발생했습니다.' : '아이템 착용 중 오류가 발생했습니다.')
+          setAlertMessage(tab === 'shop' ? '아이템 구매 중 오류가 발생했습니다' : '아이템 착용 중 오류가 발생했습니다');
         };
+        setAlertOpen(true);
       }
     }
     setSelectedItem(null);
@@ -97,11 +108,13 @@ export default function ShopClient({ coin, initialItems, equippedItemImg, access
   const handleReset = async () => {
     try {
       await unequipItem(accessToken!);
-      alert('아이템이 기본 상태로 되돌아갔습니다');
+      setAlertMessage('아이템이 기본 상태로 되돌아갔습니다');
+      setAlertOpen(true);
       router.refresh();
     } catch (err) {
       console.error(err);
-      alert('해제 중 오류가 발생했습니다');
+      setAlertMessage('해제 중 오류가 발생했습니다');
+      setAlertOpen(true);
     }
   };
 
@@ -170,6 +183,14 @@ export default function ShopClient({ coin, initialItems, equippedItemImg, access
         onCancel={() => setSelectedItem(null)}
         variant="happy"
         lines={confirmLines ?? []}
+      />
+
+      {/* 알림 모달(확인 누르면 새로고침) */}
+      <AlertModal
+        open={alertOpen}
+        onConfirm={handleAlertConfirm}
+        title={alertMessage}
+        confirmText="확인"
       />
     </div>
   );

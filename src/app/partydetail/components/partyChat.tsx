@@ -366,20 +366,18 @@ export default function PartyChat({
         </div>
       </div>
 
-      <div className="mt-3">
-        <div className="relative rounded-xl bg-basic-white focus-within:ring-2 focus-within:ring-orange-nuts">
-          <div className="flex items-center gap-2 px-3 py-2">
-            <input
-              value={text}
-              onChange={e => setText(e.target.value)}
-              placeholder="채팅을 입력해 주세요"
-              className="flex-1 bg-transparent outline-none"
-              onKeyDown={e => {
-                if (e.key === 'Enter') handleSend();
-              }}
-            />
-            <button onClick={handleSend} > </button>
-          </div>
+      <div className="relative mt-3">
+        <div className="flex items-center bg-basic-white rounded-xl">
+          <input
+            value={text}
+            onChange={e => setText(e.target.value)}
+            placeholder="채팅을 입력해 주세요"
+            className="flex-1 bg-transparent px-3 py-2 rounded-xl"
+            onKeyDown={e => {
+              if (e.key === 'Enter') handleSend();
+            }}
+          />
+          <button onClick={handleSend} tabIndex={-1}> </button>
         </div>
       </div>
     </>
