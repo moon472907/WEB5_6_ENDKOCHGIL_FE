@@ -6,6 +6,7 @@ import Checkbox from './Checkbox';
 import { updateTaskCompletion } from '@/lib/api/home/task';
 import { getTodayString } from '@/utils/date';
 import { createNotification } from '@/lib/api/notification';
+import { useNotificationStore } from '../notification/useNotificationStore';
 
 interface CheckboxWrapperProps {
   task: Task;
@@ -20,6 +21,7 @@ export default function CheckboxWrapper({
 }: CheckboxWrapperProps) {
   const [isUpdating, setIsUpdating] = useState(false);
   const [checked, setChecked] = useState(task.status === 'COMPLETED');
+  const addNotification = useNotificationStore((state) => state.addNotification);
 
   const handleCheckboxChange = useCallback(
     async (nextChecked: boolean) => {
@@ -37,15 +39,14 @@ export default function CheckboxWrapper({
         });
 
         if (res.newTitles.length > 0) {
-          await Promise.all(
-            res.newTitles.map(title =>
-              createNotification({
-                memberId,
-                message: `칭호 "${title}"가 해금되었어요!`,
-                type: 'MESSAGE'
-              })
-            )
-          );
+          for (const title of res.newTitles) {
+            const data = await createNotification({
+              memberId,
+              message: `칭호 "${title}"가 해금되었어요!`,
+              type: 'MESSAGE',
+            });
+            addNotification(data.content);
+          }
         }
 
         onStatusChange(task.taskId, newStatus);
@@ -56,7 +57,7 @@ export default function CheckboxWrapper({
         setIsUpdating(false);
       }
     },
-    [isUpdating, memberId, onStatusChange, task.taskId]
+    [isUpdating, memberId, onStatusChange, task.taskId, addNotification]
   );
 
   return (
