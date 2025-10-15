@@ -1,5 +1,12 @@
 import Image from 'next/image';
 import SocialLoginButton from './components/SocialLoginButton';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: '로그인 - NuTree',
+  description:
+    '로그인하고 너츠와 함께 당신의 나무를 키워보세요.'
+};
 
 export default function Page() {
   return (

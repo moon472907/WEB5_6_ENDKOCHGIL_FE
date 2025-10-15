@@ -14,8 +14,10 @@ export default async function Home() {
       await setDevTime('2025-10-13');
     }
 
-    const tasks = await getTodayTask(accessToken);
-    const profile = await getMyInfo(accessToken);
+    const [tasks, profile] = await Promise.all([
+      getTodayTask(accessToken),
+      getMyInfo(accessToken),
+    ]);
 
     return (
       <HomeClientWrapper
