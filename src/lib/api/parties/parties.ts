@@ -18,6 +18,9 @@ export type PartyApiItem = {
     email?: string;
     name?: string;
     status?: 'PENDING' | 'ACCEPTED' | 'COMPLETED' | 'LEFT';
+    // 추가된 응답 필드
+    title?: string | null;
+    item?: { id: number; name: string; iconUrl: string | null } | null;
   }[];
   missionId?: number;
   category?: 'EXERCISE' | 'LEARNING' | 'HABIT' | 'MENTAL' | 'CUSTOM' | string;
@@ -111,12 +114,13 @@ export async function fetchPartiesClient(
 
 /**
  *   특정 파티 상세 조회
- * - getBaseUrl()로 정리
  */
 export async function fetchPartyDetailClient(
-  partyId: string | number
+  partyId: string | number,
+  opts?: { includeDecorations?: boolean }
 ): Promise<PartyApiItem> {
-  const url = `${getBaseUrl()}/api/v1/parties/${partyId}`;
+  const qs = opts?.includeDecorations ? '?includeDecorations=true' : '';
+  const url = `${getBaseUrl()}/api/v1/parties/${partyId}${qs}`;
   const res = await fetch(url, {
     credentials: 'include',
     headers: { Accept: 'application/json' }
