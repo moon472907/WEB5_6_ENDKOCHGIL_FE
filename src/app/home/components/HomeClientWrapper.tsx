@@ -33,6 +33,10 @@ export default function HomeClientWrapper({
       ]);
       setTasks(updatedTasks);
       setProfile(updatedProfile);
+      
+      console.log("updatedTasks - ", updatedTasks);
+      console.log("updatedProfile - ", updatedProfile);
+      
     } catch (err) {
       console.error('데이터 새로고침 실패:', err);
     }
@@ -44,7 +48,7 @@ export default function HomeClientWrapper({
     <div className="flex flex-col min-h-dvh pb-20">
       <HeaderSection profile={profile} accessToken={accessToken} />
       <CharacterSection equippedItemImg={equippedItemImg} />
-      <MissionListSection initialTasks={tasks} onRefreshData={refreshData} />
+      <MissionListSection memberId={profile.id} initialTasks={tasks} onRefreshData={refreshData} />
       <Nav />
     </div>
   );

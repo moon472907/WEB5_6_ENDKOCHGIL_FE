@@ -1,51 +1,47 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { FaCheck } from 'react-icons/fa6';
 
 interface CheckboxProps {
   label: string;
-  defaultChecked?: boolean;
-  onChange?: (checked: boolean) => void;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  disabled?: boolean;
 }
 
 export default function Checkbox({
   label,
-  defaultChecked = false,
-  onChange
+  checked,
+  onChange,
+  disabled = false,
 }: CheckboxProps) {
-  const [checked, setChecked] = useState(defaultChecked);
-
-
-  // 부모에서 defaultChecked가 바뀔 경우에도 반영되도록
-    useEffect(() => {
-    setChecked(defaultChecked);
-  }, [defaultChecked]);
-
-
-  const handleChange = () => {
-    const next = !checked;
-    setChecked(next);
-    onChange?.(next); // 부모 콜백 실행
+  const handleClick = () => {
+    if (disabled) return;
+    onChange(!checked);
   };
 
   return (
-    <label className="inline-flex items-center gap-2 cursor-pointer select-none">
+    <label
+      className={`inline-flex items-center gap-2 cursor-pointer select-none ${
+        disabled ? 'opacity-60 cursor-not-allowed' : ''
+      }`}
+    >
       <input
         type="checkbox"
         checked={checked}
-        onChange={handleChange}
-        className="hidden peer"
+        onChange={handleClick}
+        className="hidden"
+        readOnly
+        disabled={disabled}
       />
       <span
-        className={`w-5 h-5 flex items-center justify-center 
-               rounded  
-               ${checked ? '' : 'border-2 border-gray-06'}  
-               peer-checked:bg-orange-main peer-checked:text-basic-white`}
+        className={`w-5 h-5 flex items-center justify-center rounded 
+          ${checked ? 'bg-orange-main text-basic-white' : 'border-2 border-gray-06'}
+        `}
       >
         {checked && <FaCheck />}
       </span>
-      <span className="text-gray-07 peer-checked:line-through">{label}</span>
+      <span className={`text-gray-07 ${checked ? 'line-through' : ''}`}>{label}</span>
     </label>
   );
 }

@@ -11,6 +11,7 @@ import MissionPlanSection from './MissionPlanSection';
 import { updateWeekTasks } from '@/lib/api/mission/mission';
 import { createNotification } from '@/lib/api/notification';
 import { getMyInfo } from '@/lib/api/member';
+import { useNotificationStore } from '@/app/home/components/notification/useNotificationStore';
 
 interface EditedTask {
   subGoalId: number;
@@ -27,6 +28,7 @@ export default function MissionDetailView({ mission: initialMission }: Props) {
   const [mission, setMission] = useState(initialMission); // 화면에 보여줄 미션 데이터
   const [editedTasks, setEditedTasks] = useState<EditedTask[]>([]); // 사용자가 실제로 수정한 task
   const [memberId, setMemberId] = useState<number | null>(null);
+  const addNotification = useNotificationStore(state => state.addNotification);
 
   // 로그인 사용자 정보(알림용) 가져오기
   useEffect(() => {
@@ -104,11 +106,12 @@ export default function MissionDetailView({ mission: initialMission }: Props) {
 
       // (2) 수정 유무 관계없이 알림 생성
       if (memberId) {
-        await createNotification({
+        const res = await createNotification({
           memberId,
           message: `새로운 미션 "${mission.title}"을 생성했어요!`,
           type: 'MESSAGE'
         });
+        addNotification(res.content);
       }
 
       // (3) 홈으로 이동

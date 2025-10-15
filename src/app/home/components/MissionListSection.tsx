@@ -5,27 +5,34 @@ import MissionCard from '@/app/home/components/mission/MissionCard';
 import EmptyMissionCard from '@/app/home/components/mission/EmptyMissionCard';
 import NewMissionButton from '@/app/home/components/mission/NewMissionButton';
 import type { Task } from '@/app/home/types/task';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface MissionListSectionProps {
+  memberId: number;
   initialTasks: Task[];
-  onRefreshData?: () => void;
+  onRefreshData: () => void;
 }
 
 export default function MissionListSection({
+  memberId,
   initialTasks,
   onRefreshData
 }: MissionListSectionProps) {
   const [taskList, setTaskList] = useState<Task[]>(initialTasks);
+
+   useEffect(() => {
+    setTaskList(initialTasks);
+  }, [initialTasks]);
+
 
   const handleStatusChange = async (
     taskId: number,
     newStatus: 'PENDING' | 'COMPLETED'
   ) => {
     // Checkbox 낙관적 업데이트
-    setTaskList(prev =>
-      prev.map(t => (t.taskId === taskId ? { ...t, status: newStatus } : t))
-    );
+    // setTaskList(prev =>
+    //   prev.map(t => (t.taskId === taskId ? { ...t, status: newStatus } : t))
+    // );
 
     // 상위에서 최신 데이터 전체를 다시 불러오게 요청
     onRefreshData?.();
@@ -55,6 +62,7 @@ export default function MissionListSection({
             <MissionCard
               key={task.taskId}
               task={task}
+              memberId={memberId}
               onStatusChange={handleStatusChange}
             />
           ))
