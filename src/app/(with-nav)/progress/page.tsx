@@ -187,7 +187,7 @@ export default function Page() {
           {tab === 'ongoing' ? (
             <div className="text-center w-[280px]">
               <p className="text-lg text-basic-black leading-relaxed">
-                이번주 평균 달성률은{' '}
+                평균 달성률은{' '}
                 <strong className="text-orange-main">{average}%</strong>
               </p>
               <p className="text-lg text-basic-black leading-relaxed">
@@ -234,7 +234,7 @@ export default function Page() {
           {loading ? (
             <div className="text-sm text-text-sub">로딩 중...</div>
           ) : filtered.length === 0 ? (
-            <div className="text-sm text-gray-500 text-center">
+            <div className="text-sm text-gray-500 text-center mt-3">
               {tab === 'ongoing'
                 ? '진행 중인 파티가 없습니다.'
                 : '완료된 파티가 없습니다.'}

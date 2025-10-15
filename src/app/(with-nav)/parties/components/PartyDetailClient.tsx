@@ -199,7 +199,7 @@ export default function PartyDetailClient({ partyId }: { partyId: string }) {
         <div className="w-[360px] max-w-full space-y-3">
           <h3 className="text-lg font-semibold">신청/초대 관리</h3>
           {/* 탭 전환 버튼 */}
-          <div className="grid grid-cols-2 rounded-xl bg-gray-100 p-1">
+          <div className="grid grid-cols-2 gap-2 rounded-xl bg-gray-100 p-1">
             <Button
               fullWidth
               size="md"
