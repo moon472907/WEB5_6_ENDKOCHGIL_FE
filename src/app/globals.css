@@ -83,6 +83,13 @@
   body {
     @apply bg-basic-white text-basic-black;
   }
+  :focus {
+    @apply outline-none;
+  }
+
+  :focus-visible {
+    @apply ring-2 ring-orange-sub rounded-md;
+  }
 }
 
 

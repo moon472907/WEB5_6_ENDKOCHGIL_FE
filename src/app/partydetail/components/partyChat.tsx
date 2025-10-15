@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
+import { BASE_URL } from '@/lib/api/config';
 
 type MemberLite = {
   id?: number;
@@ -85,8 +86,16 @@ export default function PartyChat({
     let abort = false;
     (async () => {
       try {
-        const url = `/api/v1/parties/${encodeURIComponent(partyId)}/chat/history?page=0&size=30`;
-        const res = await fetch(url, { credentials: 'include' });
+        const base = BASE_URL?.replace(/\/$/, '');
+        if (!base) {
+          console.error('BASE_URL이 설정되지 않았습니다. config.ts/.env를 확인하세요.');
+          return;
+        }
+        const url = `${base}/api/v1/parties/${encodeURIComponent(partyId)}/chat/history?page=0&size=30`;
+        const res = await fetch(url, {
+          credentials: 'include',
+          headers: { Accept: 'application/json' },
+        });
         const json = await res.json().catch(() => null);
 
         const list: unknown[] = Array.isArray(json)
@@ -175,9 +184,9 @@ export default function PartyChat({
 
   // STOMP 연결
   useEffect(() => {
-    const base = process.env.NEXT_PUBLIC_API_BASE_URL;
+    const base = BASE_URL;
     if (!base) {
-      console.error('NEXT_PUBLIC_API_BASE_URL 환경변수가 없습니다.');
+      console.error('BASE_URL이 설정되지 않았습니다.');
       return;
     }
     const endpoint = `${base.replace(/\/$/, '')}/ws/chat`;
@@ -188,13 +197,10 @@ export default function PartyChat({
       reconnectDelay: 5000,
       heartbeatIncoming: 10000,
       heartbeatOutgoing: 10000,
-      debug: isDev ? (msg) => console.log('[STOMP]', msg) : undefined,
       onConnect: () => {
         sub = client.subscribe(`/topic/party/${partyId}`, (msg) => {
           const incoming = parseIncoming(msg);
           if (!incoming) return;
-
-          if (isDev) console.log('WS payload:', incoming);
 
           // 중복 방지 및 낙관치 교체
           setMessages((prev) => {
@@ -360,20 +366,18 @@ export default function PartyChat({
         </div>
       </div>
 
-      <div className="mt-3">
-        <div className="relative rounded-xl bg-basic-white focus-within:ring-2 focus-within:ring-orange-nuts">
-          <div className="flex items-center gap-2 px-3 py-2">
-            <input
-              value={text}
-              onChange={e => setText(e.target.value)}
-              placeholder="채팅을 입력해 주세요"
-              className="flex-1 bg-transparent outline-none"
-              onKeyDown={e => {
-                if (e.key === 'Enter') handleSend();
-              }}
-            />
-            <button onClick={handleSend} > </button>
-          </div>
+      <div className="relative mt-3">
+        <div className="flex items-center bg-basic-white rounded-xl">
+          <input
+            value={text}
+            onChange={e => setText(e.target.value)}
+            placeholder="채팅을 입력해 주세요"
+            className="flex-1 bg-transparent px-3 py-2 rounded-xl"
+            onKeyDown={e => {
+              if (e.key === 'Enter') handleSend();
+            }}
+          />
+          <button onClick={handleSend} tabIndex={-1}> </button>
         </div>
       </div>
     </>
