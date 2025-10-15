@@ -114,47 +114,22 @@ export async function fetchPartiesClient(
 
 /**
  *   특정 파티 상세 조회
- * - includeDecorations=true 지원(칭호/아이템 강제 조인)
- * - noCache=true 면 캐시 무효화 쿼리와 no-store로 강제 최신화
  */
 export async function fetchPartyDetailClient(
   partyId: string | number,
-  opts?: { includeDecorations?: boolean; noCache?: boolean },
-  signal?: AbortSignal
+  opts?: { includeDecorations?: boolean }
 ): Promise<PartyApiItem> {
-  const base = getBaseUrl();
-  const sp = new URLSearchParams();
-  if (opts?.includeDecorations) sp.set('includeDecorations', 'true');
-  if (opts?.noCache) sp.set('_', Date.now().toString()); // cache-busting
-  const qs = sp.toString() ? `?${sp.toString()}` : '';
-  const url = base
-    ? `${base}/api/v1/parties/${encodeURIComponent(String(partyId))}${qs}`
-    : `/api/v1/parties/${encodeURIComponent(String(partyId))}${qs}`;
-
+  const qs = opts?.includeDecorations ? '?includeDecorations=true' : '';
+  const url = `${getBaseUrl()}/api/v1/parties/${partyId}${qs}`;
   const res = await fetch(url, {
     credentials: 'include',
-    headers: { Accept: 'application/json', 'Cache-Control': 'no-cache' },
-    cache: 'no-store',
-    signal
+    headers: { Accept: 'application/json' }
   });
-
-  const text = await res.text().catch(() => '');
-  const parsed = safeJsonParse<unknown>(text);
-
-  if (!res.ok) {
-    let msg = `HTTP ${res.status}`;
-    if (parsed && typeof parsed === 'object' && parsed !== null) {
-      const err = parsed as { message?: string; error?: string };
-      if (err.message && err.message.trim()) msg = err.message;
-      else if (err.error && err.error.trim()) msg = err.error;
-    }
-    throw new Error(msg);
-  }
-
-  if (parsed && typeof parsed === 'object' && parsed !== null && 'content' in parsed) {
-    return parsed.content as PartyApiItem;
-  }
-  return parsed as PartyApiItem;
+  if (!res.ok) throw new Error(`fetchPartyDetailClient: HTTP ${res.status}`);
+  const json = await res.json();
+  if (json && typeof json === 'object' && 'content' in json)
+    return json.content as PartyApiItem;
+  return json as PartyApiItem;
 }
 
 /**

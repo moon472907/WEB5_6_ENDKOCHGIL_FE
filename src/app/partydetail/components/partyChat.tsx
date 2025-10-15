@@ -197,13 +197,10 @@ export default function PartyChat({
       reconnectDelay: 5000,
       heartbeatIncoming: 10000,
       heartbeatOutgoing: 10000,
-      debug: isDev ? (msg) => console.log('[STOMP]', msg) : undefined,
       onConnect: () => {
         sub = client.subscribe(`/topic/party/${partyId}`, (msg) => {
           const incoming = parseIncoming(msg);
           if (!incoming) return;
-
-          if (isDev) console.log('WS payload:', incoming);
 
           // 중복 방지 및 낙관치 교체
           setMessages((prev) => {
