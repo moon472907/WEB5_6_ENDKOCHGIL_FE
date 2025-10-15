@@ -15,7 +15,8 @@ export default function PartyCard({
   startAt,
   endAt,
   people,
-  id
+  id,
+  alreadyJoined, // 추가: 선택적 프롭으로 이미 참여 여부 전달 가능
 }: {
   category?: PartyApiItem['category'];
   isPublic?: boolean;
@@ -24,6 +25,7 @@ export default function PartyCard({
   endAt?: string;
   people?: string;
   id?: number | string;
+  alreadyJoined?: boolean; // 추가
 }) {
   const router = useRouter();
 
@@ -50,7 +52,64 @@ export default function PartyCard({
   const weeks = calcWeeks(startAt, endAt);
   const [openConfirm, setOpenConfirm] = useState(false);
   const [openResult, setOpenResult] = useState(false);
-  const [openError, setOpenError] = useState(false); // 실패 모달 상태 추가
+  const [openError, setOpenError] = useState(false);
+  const [errorLines, setErrorLines] = useState<string[]>([
+    '참가 신청에 실패했습니다.',
+    '잠시 후 다시 시도해 주세요.',
+  ]);
+  const isFull = (() => {
+    if (!people) return false;
+    const m = /^(\d+)\s*\/\s*(\d+)$/.exec(people);
+    if (!m) return false;
+    const cur = parseInt(m[1], 10);
+    const max = parseInt(m[2], 10);
+    return Number.isFinite(cur) && Number.isFinite(max) && cur >= max;
+  })();
+
+  // 현재 파티 참여 여부(프롭이 없으면 클릭 시 한 번 조회) - any 미사용
+  const checkAlreadyJoined = async (partyId: number | string): Promise<boolean> => {
+    if (alreadyJoined === true) return true;
+    if (alreadyJoined === false) return false;
+
+    // 타입 가드
+    const isPartyApiItem = (o: unknown): o is PartyApiItem => {
+      return typeof o === 'object' && o !== null && 'id' in o && typeof (o as { id: unknown }).id === 'number';
+    };
+    const hasContentArray = (d: unknown): d is { content: PartyApiItem[] } => {
+      if (typeof d !== 'object' || d === null || !('content' in d)) return false;
+      const c = (d as { content: unknown }).content;
+      return Array.isArray(c) && c.every(isPartyApiItem);
+    };
+    const hasNestedContentArray = (d: unknown): d is { content: { content: PartyApiItem[] } } => {
+      if (typeof d !== 'object' || d === null || !('content' in d)) return false;
+      const c1 = (d as { content: unknown }).content;
+      if (typeof c1 !== 'object' || c1 === null || !('content' in c1)) return false;
+      const c2 = (c1 as { content: unknown }).content;
+      return Array.isArray(c2) && c2.every(isPartyApiItem);
+    };
+
+    try {
+      const res = await fetch('/api/v1/parties/my-parties?status=ongoing&page=0&size=200', {
+        credentials: 'include',
+      });
+      if (!res.ok) return false;
+
+      const data: unknown = await res.json().catch(() => null);
+
+      const list: PartyApiItem[] = Array.isArray(data)
+        ? (data as unknown[]).filter(isPartyApiItem)
+        : hasContentArray(data)
+        ? data.content
+        : hasNestedContentArray(data)
+        ? data.content.content
+        : [];
+
+      const ids: number[] = list.map((p) => p.id);
+      return ids.some((v) => String(v) === String(partyId));
+    } catch {
+      return false;
+    }
+  };
 
   return (
     <article className="rounded-2xl bg-bg-card-default p-4 shadow-md border border-transparent focus:outline-none">
@@ -94,7 +153,24 @@ export default function PartyCard({
             <Button
               variant="basic"
               size="md"
-              onClick={() => setOpenConfirm(true)}
+              onClick={async () => {
+                // 1) 먼저 참여 여부 체크
+                if (id !== undefined && id !== null) {
+                  const joined = await checkAlreadyJoined(id);
+                  if (joined) {
+                    setErrorLines(['현재 파티에 참여중입니다.', '해당 파티에서 활동을 계속하세요.']);
+                    setOpenError(true);
+                    return;
+                  }
+                }
+                // 2) 그다음 정원 초과 체크
+                if (isFull) {
+                  setErrorLines(['인원 초과로 신청이 불가능합니다.', '다음에 다시 시도해 주세요.']);
+                  setOpenError(true);
+                  return;
+                }
+                setOpenConfirm(true);
+              }}
             >
               참가신청
             </Button>
@@ -110,11 +186,32 @@ export default function PartyCard({
         onConfirm={async () => {
           setOpenConfirm(false);
           if (id) {
+            // 1) 참여 여부 우선 가드
+            if (await checkAlreadyJoined(id)) {
+              setErrorLines(['현재 파티에 참여중입니다.', '해당 파티에서 활동을 계속하세요.']);
+              setOpenError(true);
+              return;
+            }
+            // 2) 정원 초과 가드
+            if (isFull) {
+              setErrorLines(['인원 초과로 신청이 불가능합니다.', '다음에 다시 시도해 주세요.']);
+              setOpenError(true);
+              return;
+            }
             try {
-              await joinPartyClient(id); // 참가신청 API 호출
-              setOpenResult(true); // 신청 완료 안내 모달 오픈
-            } catch {
-              setOpenError(true); // 실패 안내 모달 오픈
+              await joinPartyClient(id);
+              setOpenResult(true);
+            } catch (err) {
+              const msg =
+                (err && typeof err === 'object' && 'message' in err && typeof err.message === 'string')
+                  ? err.message as string
+                  : String(err);
+              if (msg.includes('409') || /이미\s*(참가|참여)/.test(msg) || /ALREADY/i.test(msg)) {
+                setErrorLines(['이미 참가 중인 파티입니다.', '해당 파티에서 활동을 계속하세요.']);
+              } else {
+                setErrorLines(['참가 신청에 실패했습니다.', '잠시 후 다시 시도해 주세요.']);
+              }
+              setOpenError(true);
             }
           }
         }}
@@ -137,7 +234,7 @@ export default function PartyCard({
       {/* 신청 실패 안내 모달 */}
       <ConfirmModal
         open={openError}
-        lines={['참가 신청에 실패했습니다.', '잠시 후 다시 시도해 주세요.']}
+        lines={errorLines}
         onCancel={() => setOpenError(false)}
         onConfirm={() => setOpenError(false)}
         confirmText="확인"

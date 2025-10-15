@@ -243,6 +243,16 @@ export async function fetchMyPartiesWithStatus(
     }
   }
 
+  // 2) 없으면 일반 목록으로 보강 (안전 래퍼 사용)
+  if (list.length === 0) {
+    try {
+      const resp = await fetchPartiesClientSafe({ size: 200 });
+      list = resp.list ?? [];
+    } catch {
+      list = [];
+    }
+  }
+
   // 2) missions 조회
   type MissionTask = { taskId?: number; status?: string | null };
   type MissionSubGoal = { tasks?: MissionTask[] | null; taskDtos?: MissionTask[] | null };
@@ -404,5 +414,30 @@ export async function leavePartyClient(partyId: string | number): Promise<void> 
   if (!res.ok) {
     const text = await res.text().catch(() => '');
     throw new Error(`leavePartyClient: HTTP ${res.status} ${text}`);
+  }
+}
+
+/**
+ * 실패 시 throw 대신 빈 목록을 반환하는 안전 래퍼
+ */
+export async function fetchPartiesClientSafe(
+  params: {
+    page?: number;
+    size?: number;
+    sort?: string;
+    category?: string;
+    startDate?: string;
+  } = {},
+  signal?: AbortSignal
+): Promise<{
+  list: PartyApiItem[];
+  pageMeta: PartiesPage | null;
+  raw: PartiesApiResponse;
+}> {
+  try {
+    return await fetchPartiesClient(params, signal);
+  } catch (e) {
+    console.warn('fetchPartiesClientSafe: fallback to empty list', e);
+    return { list: [], pageMeta: null, raw: { content: [] } as PartiesApiResponse };
   }
 }

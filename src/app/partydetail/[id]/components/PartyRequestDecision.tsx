@@ -52,7 +52,6 @@ export default function PartyRequestDecision({
       setPending(null);
     }
   };
-console.log('[REQ]', { partyId, requestId: request.id });
   const isBlocked = disabled || pending !== null;
 
   return (
@@ -64,7 +63,7 @@ console.log('[REQ]', { partyId, requestId: request.id });
         title="승인"
         onClick={handleApprove}
         disabled={isBlocked}
-        className={`rounded-lg px-2 py-1 text-sm ${
+        className={`rounded-lg px-2 py-1 text-sm cursor-pointer ${
           isBlocked ? 'opacity-50 cursor-not-allowed' : 'hover:bg-orange-50'
         } text-orange-nuts border border-orange-nuts`}
       >
@@ -78,7 +77,7 @@ console.log('[REQ]', { partyId, requestId: request.id });
         title="거절"
         onClick={handleReject}
         disabled={isBlocked}
-        className={`rounded-lg px-2 py-1 text-sm ${
+        className={`rounded-lg px-2 py-1 text-sm cursor-pointer ${
           isBlocked ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'
         } text-gray-700 border border-gray-300`}
       >
