@@ -63,10 +63,7 @@ export default function PartyDetailClient({ partyId }: { partyId: string }) {
           setLoading(true);
           setError(null);
         }
-        const detail = await fetchPartyDetailClient(partyId, {
-          includeDecorations: true,
-          noCache: true, // ← 캐시 무효화
-        });
+        const detail = await fetchPartyDetailClient(partyId, { includeDecorations: true });
         if (!mounted) return;
 
         const parsedLeaderId =
@@ -155,7 +152,7 @@ export default function PartyDetailClient({ partyId }: { partyId: string }) {
   useEffect(() => {
     const id = window.setInterval(() => {
       void loadPartyDetail({ silent: true });
-    }, 1000);
+    }, 2000);
     return () => window.clearInterval(id);
   }, [loadPartyDetail]);
 
@@ -207,7 +204,7 @@ export default function PartyDetailClient({ partyId }: { partyId: string }) {
                   : encodeURI(base + bust);
                 return (
                   <Image
-                    key={finalSrc}
+                    key={finalSrc} // 아이템 변경 시 리렌더 유도
                     src={finalSrc}
                     alt={m.item?.name ?? '아이템'}
                     fill
