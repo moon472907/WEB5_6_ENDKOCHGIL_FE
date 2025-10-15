@@ -8,19 +8,27 @@ import type { Task } from '@/app/home/types/task';
 import { useState } from 'react';
 
 interface MissionListSectionProps {
-  tasks: Task[];
+  initialTasks: Task[];
+  onRefreshData?: () => void;
 }
 
-export default function MissionListSection({ tasks }: MissionListSectionProps) {
-  const [taskList, setTaskList] = useState<Task[]>(tasks);
+export default function MissionListSection({
+  initialTasks,
+  onRefreshData
+}: MissionListSectionProps) {
+  const [taskList, setTaskList] = useState<Task[]>(initialTasks);
 
-  const handleStatusChange = (
+  const handleStatusChange = async (
     taskId: number,
     newStatus: 'PENDING' | 'COMPLETED'
   ) => {
+    // Checkbox 낙관적 업데이트
     setTaskList(prev =>
       prev.map(t => (t.taskId === taskId ? { ...t, status: newStatus } : t))
     );
+
+    // 상위에서 최신 데이터 전체를 다시 불러오게 요청
+    onRefreshData?.();
   };
 
   const completedCount = taskList.filter(t => t.status === 'COMPLETED').length;
@@ -36,14 +44,14 @@ export default function MissionListSection({ tasks }: MissionListSectionProps) {
             오늘의 미션
           </span>
           <span className="text-lg font-semibold text-text-sub">
-            {completedCount}/{tasks.length}
+            {completedCount}/{taskList.length}
           </span>
         </div>
       </div>
 
       <div className="flex flex-col gap-4">
-        {tasks.length > 0 ? (
-          tasks.map(task => (
+        {taskList.length > 0 ? (
+          taskList.map(task => (
             <MissionCard
               key={task.taskId}
               task={task}

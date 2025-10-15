@@ -1,39 +1,32 @@
 import { cookies } from 'next/headers';
-import Nav from '@/components/nav/Nav';
-import HeaderSection from './home/components/HeaderSection';
-import CharacterSection from './home/components/CharacterSection';
-import MissionListSection from './home/components/MissionListSection';
 import { getTodayTask } from '@/lib/api/home/task';
 import { getMyInfo } from '@/lib/api/member';
 import { setDevTime } from '@/lib/api/home/devTime';
 import { redirect } from 'next/navigation';
+import HomeClientWrapper from './home/components/HomeClientWrapper';
 
 export default async function Home() {
   const cookieStore = cookies();
   const accessToken = (await cookieStore).get('accessToken')?.value;
 
-  try { 
-    const [tasks, profile] = await Promise.all([
-      getTodayTask(accessToken),
-      getMyInfo(accessToken),
-    ]);
-    
+  try {
     if (process.env.NODE_ENV === 'development') {
       await setDevTime('2025-10-13');
     }
 
-    const equippedItemImg = profile?.item ?? null;
-    
+    const [tasks, profile] = await Promise.all([
+      getTodayTask(accessToken),
+      getMyInfo(accessToken),
+    ]);
+
     return (
-      <div className="flex flex-col min-h-dvh pb-20">
-        <HeaderSection profile={profile} accessToken={accessToken} />
-        <CharacterSection equippedItemImg={equippedItemImg} />
-        <MissionListSection tasks={tasks} />
-        <Nav />
-      </div>
+      <HomeClientWrapper
+        initialTasks={tasks}
+        initialProfile={profile}
+        accessToken={accessToken}
+      />
     );
-    
-  } catch(error) {
+  } catch (error) {
     if (error instanceof Error && error.message === 'UNAUTHORIZED') {
       redirect('/login');
     }

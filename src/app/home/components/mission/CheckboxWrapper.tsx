@@ -26,9 +26,9 @@ export default function CheckboxWrapper({
       });
 
       console.log(`Task ${task.taskId} 상태가 ${newStatus}로 변경됨`);
+
+      // 부모에게 상태 변경 전달
       onStatusChange?.(task.taskId, newStatus);
-      
-      // TODO: 경험치, 코인, 칭호 관련 API 호출도 여기서 이어서 실행
     } catch (err) {
       console.error('태스크 상태 업데이트 실패', err);
     }

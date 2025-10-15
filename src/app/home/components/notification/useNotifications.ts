@@ -46,7 +46,12 @@ export function useNotifications(accessToken?: string) {
 
   const handleDelete = async (id: number) => {
     try {
-      setNotifications(prev => prev.filter(n => n.id !== id));
+      setNotifications(prev => {
+        const updated = prev.filter(n => n.id !== id);
+        setHasUnread(updated.some(n => !n.isRead));
+        return updated;
+      });
+
       await deleteNotification(id);
     } catch (err) {
       console.error('삭제 실패:', err);
