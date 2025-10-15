@@ -29,8 +29,7 @@ const nextConfig: NextConfig = {
       },
       { protocol: 'https', hostname: 'nutree.noredsun.com', pathname: '/**' }
     ]
-  },
-  minimumCacheTTL: 0
+  }
 };
 
 export default nextConfig;
