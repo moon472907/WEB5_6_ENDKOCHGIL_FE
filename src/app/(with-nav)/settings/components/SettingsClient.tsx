@@ -8,6 +8,7 @@ import { useState } from "react";
 import { MdHelpOutline, MdLogout, MdPersonOutline } from "react-icons/md";
 import { logout, unregister } from "@/lib/api/member";
 import { useRouter } from "next/navigation";
+import AlertModal from "@/components/modal/AlertModal";
 
 interface Profile {
   title?: string;
@@ -24,28 +25,43 @@ export default function SettingsClient({ profile }: Props) {
   const [logoutOpen, setLogoutOpen] = useState(false); // 로그아웃 모달 열림 상태
   const [unregisterOpen, setUnregisterOpen] = useState(false); // 회원탈퇴 모달 열림 상태
 
+  const [alertOpen, setAlertOpen] = useState(false); // AlertModal 상태
+  const [alertMessage, setAlertMessage] = useState(''); // Alert 메시지
+  const [redirectPath, setRedirectPath] = useState<string | null>(null); // 이동 경로
+
   // 로그아웃 핸들러
   const handleLogout = async () => {
     const success = await logout();
+    setLogoutOpen(false);
     if (success) {
-      alert('로그아웃 되었습니다.');
-      router.push('/login'); // 로그인 페이지로 이동
+      setAlertMessage('로그아웃 되었습니다');
+      setRedirectPath('/login');
+      setAlertOpen(true);
     } else {
-      alert('로그아웃에 실패했습니다.');
+      setAlertMessage('로그아웃에 실패했습니다');
+      setRedirectPath(null);
+      setAlertOpen(true);
     }
-    setLogoutOpen(false); // 모달 닫기
   };
 
   // 회원탈퇴 핸들러
   const handleUnregister = async () => {
     const success = await unregister();
+    setUnregisterOpen(false);
     if (success) {
-      alert('회원 탈퇴가 완료되었습니다.');
-      router.push('/login'); // 로그인 페이지로 이동
+      setAlertMessage('회원 탈퇴가 완료되었습니다');
+      setRedirectPath('/login');
+      setAlertOpen(true);
     } else {
-      alert('회원 탈퇴에 실패했습니다.');
+      setAlertMessage('회원 탈퇴에 실패했습니다');
+      setRedirectPath(null);
+      setAlertOpen(true);
     }
-    setUnregisterOpen(false); // 모달 닫기
+  };
+
+  const handleAlertConfirm = () => {
+    setAlertOpen(false);
+    if (redirectPath) router.push(redirectPath);
   };
 
   return (
@@ -141,6 +157,13 @@ export default function SettingsClient({ profile }: Props) {
           onCancel={() => setUnregisterOpen(false)}
           variant="sad"
           lines={['탈퇴 후에는 복구가 어려워요','그래도 진행하시겠습니까?']}
+        />
+
+        <AlertModal
+          open={alertOpen}
+          onConfirm={handleAlertConfirm}
+          title={alertMessage}
+          confirmText="확인"
         />
 
 

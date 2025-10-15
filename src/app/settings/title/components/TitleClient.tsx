@@ -33,8 +33,16 @@ export default function TitleClient({ currentTitle, allTitles, accessToken }: Pr
   const [selectedTitle, setSelectedTitle] = useState<Title | null>(null);  // 칭호 상태 관리
   const [appliedTitle, setAppliedTitle] = useState(currentTitle ?? ""); // 현재 적용 중인 칭호 상태 관리
 
+  const [alertOpen, setAlertOpen] = useState(false); // alert 모달 상태
+  const [alertMessage, setAlertMessage] = useState(""); // alert 내용
+
   const ownedTitles = allTitles.filter((t) => !t.locked); // 보유 중인 칭호만 필터링
   const displayed = checked ? allTitles : ownedTitles; // 토글 상태에 따라 전체/보유 칭호 표시
+
+    const handleAlertConfirm = () => {
+    setAlertOpen(false);
+    router.refresh();
+  };
 
   // 장착 핸들러
   const handleConfirm = async () => {
@@ -42,18 +50,20 @@ export default function TitleClient({ currentTitle, allTitles, accessToken }: Pr
 
     // 이미 장착 중인 칭호인지 확인
     if (selectedTitle.name === appliedTitle) {
-      alert("이미 장착 중인 칭호입니다!");
       setEquipOpen(false);
+      setAlertMessage("이미 장착 중인 칭호입니다");
+      setAlertOpen(true);
       return;
     }
 
     try {
       await equipTitle(accessToken, selectedTitle.id);
       setAppliedTitle(selectedTitle.name);
-      alert("칭호가 장착되었습니다!");
-      router.refresh(); 
+      setAlertMessage("칭호가 장착되었습니다");
+      setAlertOpen(true);
     } catch {
-      alert("칭호 장착에 실패했습니다.");
+      setAlertMessage("칭호 장착에 실패했습니다");
+      setAlertOpen(true);
     } finally {
       setEquipOpen(false);
     }
@@ -64,10 +74,11 @@ export default function TitleClient({ currentTitle, allTitles, accessToken }: Pr
     try {
       await unequipTitle(accessToken);
       setAppliedTitle("");
-      alert("칭호가 해제되었습니다!");
-      router.refresh();
+      setAlertMessage("칭호가 해제되었습니다");
+      setAlertOpen(true);
     } catch {
-      alert("칭호 해제에 실패했습니다.");
+      setAlertMessage("칭호 해제에 실패했습니다");
+      setAlertOpen(true);
     } finally {
       setUnequipOpen(false);
     }
@@ -152,6 +163,14 @@ export default function TitleClient({ currentTitle, allTitles, accessToken }: Pr
           title="칭호 해제"
           detail="현재 장착된 칭호를 해제하시겠습니까?"
           confirmText="해제"
+        />
+
+        {/* 알림 모달 (확인 누르면 새로고침) */}
+        <AlertModal
+          open={alertOpen}
+          onConfirm={handleAlertConfirm}
+          title={alertMessage}
+          confirmText="확인"
         />
       </ContentWrapper>
     </>
