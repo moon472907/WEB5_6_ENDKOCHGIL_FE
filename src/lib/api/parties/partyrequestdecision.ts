@@ -11,70 +11,58 @@ const getBaseUrl = (): string => {
   return 'http://localhost:8080';
 };
 
-const commonOptions = {
-  method: 'POST' as const,
-  credentials: 'include' as const,
-  headers: {
-    Accept: 'application/json',
-    'Content-Type': 'application/json'
-  },
-  cache: 'no-store' as const
+type ApiErrorBody = {
+  message?: string;
+  error?: string;
+  code?: string;
+  success?: boolean;
+  [k: string]: unknown;
 };
 
-const handleError = async (res: Response) => {
+const handleError = async (res: Response): Promise<never> => {
   let msg = `HTTP ${res.status}`;
   try {
-    const j = await res.json();
-    if (
-      j &&
-      typeof j === 'object' &&
-      'message' in j &&
-      typeof j.message === 'string'
-    ) {
-      msg = j.message || msg;
+    const j: unknown = await res.json();
+    if (j && typeof j === 'object') {
+      const r = j as ApiErrorBody;
+      const m = r.message;
+      if (typeof m === 'string' && m.trim().length > 0) {
+        msg = m;
+      } else {
+        const e = r.error;
+        if (typeof e === 'string' && e.trim().length > 0) {
+          msg = e;
+        }
+      }
     }
   } catch {
-    // ignore
+    // ignore json parse errors
   }
-  throw new Error(msg);
+  throw new Error(msg || '서버 내부 오류가 발생하였습니다.');
 };
 
-// 승인
-export async function acceptPartyRequest(
-  partyId: string | number,
-  memberId: number,
-  signal?: AbortSignal
-): Promise<void> {
+// 가입 신청/초대 수락
+export async function acceptPartyRequest(partyId: string | number, memberId: number): Promise<void> {
   const base = getBaseUrl();
-  const url = `${base}/api/v1/parties/${encodeURIComponent(
-    String(partyId)
-  )}/accept`;
-
+  const url = `${base}/api/v1/parties/${encodeURIComponent(String(partyId))}/accept`;
   const res = await fetch(url, {
-    ...commonOptions,
-    signal,
-    body: JSON.stringify({ memberId })
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json', Accept: '*/*' },
+    body: JSON.stringify({ memberId }),
   });
-
   if (!res.ok) await handleError(res);
 }
 
-// 거절
-export async function rejectPartyRequest(
-  partyId: string | number,
-  memberId: number,
-  signal?: AbortSignal
-): Promise<void> {
+// 가입 신청/초대 거절
+export async function rejectPartyRequest(partyId: string | number, memberId: number): Promise<void> {
   const base = getBaseUrl();
-  const url = `${base}/api/v1/parties/${encodeURIComponent(
-    String(partyId)
-  )}/reject`;
-
+  const url = `${base}/api/v1/parties/${encodeURIComponent(String(partyId))}/reject`;
   const res = await fetch(url, {
-    ...commonOptions,
-    signal,
-    body: JSON.stringify({ memberId })
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json', Accept: '*/*' },
+    body: JSON.stringify({ memberId }),
   });
-
   if (!res.ok) await handleError(res);
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import PartySetting from '@/app/partydetail/[id]/components/PartySetting';
 import BaseModal from '@/components/modal/BaseModal';
 import Image from 'next/image';
@@ -15,84 +15,166 @@ import PartyInvite from '@/app/partydetail/[id]/components/PartyInvite';
 type Member = {
   id?: number;
   name: string;
-  subtitle?: string;
-  title?: string;
+  subtitle?: string; // email
+  title?: string | null;
+  item?: { id?: number; name?: string; iconUrl?: string | null } | null;
   crowned?: boolean;
 };
+
+// 아이콘 없으면 기본 이미지 사용
+function resolveItemIconSrc(item?: Member['item'] | null): string {
+  const fallback = '/images/nuts-default.png';
+  if (!item) return fallback;
+
+  const icon = typeof item.iconUrl === 'string' ? item.iconUrl.trim() : '';
+  if (icon.length > 0) return encodeURI(icon); // 한글/공백 대응
+
+  const id = typeof item.id === 'number' ? item.id : undefined;
+  if (typeof id === 'number' && Number.isFinite(id)) return `/items/${id}.png`;
+  return fallback;
+}
 
 export default function PartyDetailClient({ partyId }: { partyId: string }) {
   const router = useRouter();
 
   const [members, setMembers] = useState<Member[]>([]);
-  const [currentUserName, setCurrentUserName] = useState<string>(''); // display name
-  const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null); // email (server id)
+  const [currentUserName, setCurrentUserName] = useState<string>('');
+  const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const [leaderId, setLeaderId] = useState<number | null>(null);
   const [currentUserTitle, setCurrentUserTitle] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // 파티 기본 정보 (PartySetting 전달용)
   const [partyName, setPartyName] = useState<string>('');
   const [partyMaxMembers, setPartyMaxMembers] = useState<number>(4);
   const [partyIsPublic, setPartyIsPublic] = useState<boolean>(true);
 
-  // 설정 모달 열림 상태
   const [settingOpen, setSettingOpen] = useState(false);
-  // 신청/초대 관리 모달 상태
   const [manageOpen, setManageOpen] = useState(false);
   const [manageTab, setManageTab] = useState<'requests' | 'invite'>('requests');
 
-  // 1) 파티 상세 + 멤버
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      setLoading(true);
-      setError(null);
+  const loadPartyDetail = useCallback(
+    async (opts?: { silent?: boolean }) => {
+      const silent = opts?.silent === true;
+      let mounted = true;
       try {
-        const detail = await fetchPartyDetailClient(partyId);
+        if (!silent) {
+          setLoading(true);
+          setError(null);
+        }
+        const detail = await fetchPartyDetailClient(partyId, {
+          includeDecorations: true,
+          noCache: true, // ← 캐시 무효화
+        });
         if (!mounted) return;
 
-        const parsedLeaderId = typeof detail.leaderId === 'number' ? detail.leaderId : Number(detail.leaderId);
+        const parsedLeaderId =
+          typeof detail.leaderId === 'number'
+            ? detail.leaderId
+            : Number(detail.leaderId);
         setLeaderId(Number.isFinite(parsedLeaderId) ? parsedLeaderId : null);
 
         setPartyName(String(detail.name ?? ''));
-        setPartyMaxMembers(typeof detail.maxMembers === 'number' ? detail.maxMembers : 4);
+        setPartyMaxMembers(
+          typeof detail.maxMembers === 'number' ? detail.maxMembers : 4
+        );
         setPartyIsPublic(Boolean(detail.isPublic));
 
-        const rawMembers = (detail.members ?? []) as Array<Record<string, unknown>>;
-        const mapped: Member[] = rawMembers.map((m) => {
-          const id = typeof m['id'] === 'number' ? (m['id'] as number) : Number(m['id']);
-          const name = typeof m['name'] === 'string' ? (m['name'] as string) : `회원 ${id ?? ''}`;
+        const rawMembers = (detail.members ?? []) as Array<
+          Record<string, unknown>
+        >;
+        const mapped: Member[] = rawMembers.map(m => {
+          const id =
+            typeof m['id'] === 'number' ? (m['id'] as number) : Number(m['id']);
+          const name =
+            typeof m['name'] === 'string'
+              ? (m['name'] as string)
+              : `회원 ${id ?? ''}`;
+
+          const title =
+            m['title'] === null
+              ? null
+              : typeof m['title'] === 'string'
+              ? (m['title'] as string)
+              : undefined;
+
+          let item: Member['item'] = null;
+          const rawItem = m['item'];
+          if (rawItem && typeof rawItem === 'object') {
+            const r = rawItem as Record<string, unknown>;
+            const itemId =
+              typeof r.id === 'number'
+                ? r.id
+                : typeof r.id === 'string' &&
+                  r.id.trim() !== '' &&
+                  !Number.isNaN(Number(r.id))
+                ? Number(r.id)
+                : undefined;
+            const itemName =
+              typeof r.name === 'string' ? (r.name as string) : undefined;
+            const iconUrl =
+              r.iconUrl === null
+                ? null
+                : typeof r.iconUrl === 'string'
+                ? (r.iconUrl as string)
+                : undefined;
+            item = { id: itemId, name: itemName, iconUrl };
+          }
+
           return {
             id,
             name,
-            subtitle: typeof m['email'] === 'string' ? (m['email'] as string) : undefined,
-            title: typeof m['title'] === 'string' ? (m['title'] as string) : undefined,
+            subtitle:
+              typeof m['email'] === 'string'
+                ? (m['email'] as string)
+                : undefined,
+            title,
+            item,
             crowned: parsedLeaderId === id
           };
         });
         setMembers(mapped);
       } catch (err) {
         console.error(err);
-        setError('파티 상세 정보를 불러오는 데 실패했습니다.');
+        if (!silent) setError('파티 상세 정보를 불러오는 데 실패했습니다.');
       } finally {
-        if (mounted) setLoading(false);
+        if (!silent) setLoading(false);
       }
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, [partyId]);
+      return () => {
+        mounted = false;
+      };
+    },
+    [partyId]
+  );
 
-  // 2) 내 정보 분리 저장 (이름 / 이메일 / 아이디 / 칭호)
+  useEffect(() => {
+    void loadPartyDetail();
+  }, [loadPartyDetail]);
+
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      void loadPartyDetail({ silent: true });
+    }, 1000);
+    return () => window.clearInterval(id);
+  }, [loadPartyDetail]);
+
   useEffect(() => {
     (async () => {
       try {
         const me = await getMyInfo(undefined);
-        setCurrentUserName(typeof me?.name === 'string' ? me.name : (typeof me?.email === 'string' ? me.email : ''));
-        // 이메일이 빈 문자열일 경우 null로 처리하여 잘못된 senderEmail 전송을 방지
-        setCurrentUserEmail(typeof me?.email === 'string' && me.email.trim() !== '' ? me.email : null);
+        setCurrentUserName(
+          typeof me?.name === 'string'
+            ? me.name
+            : typeof me?.email === 'string'
+            ? me.email
+            : ''
+        );
+        setCurrentUserEmail(
+          typeof me?.email === 'string' && me.email.trim() !== ''
+            ? me.email
+            : null
+        );
         setCurrentUserId(typeof me?.id === 'number' ? me.id : null);
         setCurrentUserTitle(me?.title ?? null);
       } catch (err) {
@@ -113,21 +195,43 @@ export default function PartyDetailClient({ partyId }: { partyId: string }) {
             key={m.id ?? m.name}
             className="relative rounded-lg bg-basic-white p-3 flex flex-col items-center text-center shadow-sm"
           >
-            <div className="w-20 h-20 bg-gray-100 rounded-md flex items-center justify-center mb-2">
-              <span className="text-base font-semibold text-gray-08">
-                {m.name && m.name.length > 0 ? m.name.charAt(0) : '?'}
-                <br />
-                (이미지)
-              </span>
+            <div className="relative w-20 h-20 overflow-hidden rounded-md mb-2 bg-gray-100">
+              {(() => {
+                const base = resolveItemIconSrc(m.item);
+                const bust =
+                  m.item?.id !== undefined && m.item?.id !== null
+                    ? (base.includes('?') ? `&v=${m.item.id}` : `?v=${m.item.id}`)
+                    : '';
+                const finalSrc = (base + bust).startsWith('http')
+                  ? base + bust
+                  : encodeURI(base + bust);
+                return (
+                  <Image
+                    key={finalSrc}
+                    src={finalSrc}
+                    alt={m.item?.name ?? '아이템'}
+                    fill
+                    sizes="80px"
+                    className="object-cover object-center"
+                    priority
+                  />
+                );
+              })()}
             </div>
+
+            {/* 칭호 */}
             <div className="text-xs text-gray-05">
-              {m.title
-                ? m.title
+              {m.title !== undefined
+                ? m.title ?? '칭호 없음'
                 : m.id && currentUserId && m.id === currentUserId
                 ? currentUserTitle ?? '칭호 없음'
                 : '칭호 없음'}
             </div>
+
+            {/* 이름 */}
             <div className="text-sm text-gray-10 font-medium">{m.name}</div>
+
+            {/* 리더 왕관 */}
             {m.crowned && (
               <div className="absolute left-2 top-2">
                 <Image src="/crown.svg" alt="왕관" width={28} height={28} />
@@ -154,7 +258,7 @@ export default function PartyDetailClient({ partyId }: { partyId: string }) {
         </Button>
       </div>
 
-      {/* 파티 설정 버튼 (모달로 열기) */}
+      {/* 파티 설정 버튼 */}
       <div className="mb-4">
         <Button
           variant="basic"
@@ -167,21 +271,23 @@ export default function PartyDetailClient({ partyId }: { partyId: string }) {
       </div>
 
       {/* 신청/초대 관리 버튼 (리더 전용) */}
-      {currentUserId !== null && leaderId !== null && currentUserId === leaderId && (
-        <div className="mb-4">
-          <Button
-            variant="basic"
-            size="md"
-            fullWidth
-            onClick={() => {
-              setManageTab('requests');
-              setManageOpen(true);
-            }}
-          >
-            신청/초대 관리
-          </Button>
-        </div>
-      )}
+      {currentUserId !== null &&
+        leaderId !== null &&
+        currentUserId === leaderId && (
+          <div className="mb-4">
+            <Button
+              variant="basic"
+              size="md"
+              fullWidth
+              onClick={() => {
+                setManageTab('requests');
+                setManageOpen(true);
+              }}
+            >
+              신청/초대 관리
+            </Button>
+          </div>
+        )}
 
       {/* 설정 모달 */}
       <BaseModal isOpen={settingOpen} onClose={() => setSettingOpen(false)}>
@@ -190,7 +296,11 @@ export default function PartyDetailClient({ partyId }: { partyId: string }) {
           initialName={partyName}
           initialMaxMembers={partyMaxMembers}
           initialIsPublic={partyIsPublic}
-          isLeader={currentUserId !== null && leaderId !== null && currentUserId === leaderId}
+          isLeader={
+            currentUserId !== null &&
+            leaderId !== null &&
+            currentUserId === leaderId
+          }
         />
       </BaseModal>
 
@@ -198,7 +308,6 @@ export default function PartyDetailClient({ partyId }: { partyId: string }) {
       <BaseModal isOpen={manageOpen} onClose={() => setManageOpen(false)}>
         <div className="w-[360px] max-w-full space-y-3">
           <h3 className="text-lg font-semibold">신청/초대 관리</h3>
-          {/* 탭 전환 버튼 */}
           <div className="grid grid-cols-2 gap-2 rounded-xl bg-gray-100 p-1">
             <Button
               fullWidth
@@ -218,16 +327,15 @@ export default function PartyDetailClient({ partyId }: { partyId: string }) {
             </Button>
           </div>
 
-          {/* 신청 목록 */}
-          {manageTab === 'requests' && (
-            <PartyRequests partyId={partyId} />
-          )}
+          {manageTab === 'requests' && <PartyRequests partyId={partyId} />}
 
-          {/* 초대 */}
           {manageTab === 'invite' && (
             <PartyInvite
               partyId={partyId}
-              onInvitedAction={() => setManageTab('requests')} // 초대 후 목록 탭으로 전환(선택)
+              onInvitedAction={async () => {
+                await loadPartyDetail({ silent: true });
+                setManageTab('requests');
+              }}
             />
           )}
         </div>

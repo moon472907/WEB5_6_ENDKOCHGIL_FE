@@ -44,6 +44,7 @@ export default function PartyRequestDecision({
     try {
       await rejectPartyRequest(partyId, request.id);
       if (onRejectedAction) await onRejectedAction(request.id);
+
     } catch (e) {
       console.error(e);
       setErr('거절에 실패했습니다.');
@@ -51,7 +52,7 @@ export default function PartyRequestDecision({
       setPending(null);
     }
   };
-
+console.log('[REQ]', { partyId, requestId: request.id });
   const isBlocked = disabled || pending !== null;
 
   return (
@@ -84,7 +85,7 @@ export default function PartyRequestDecision({
         ✕
       </button>
 
-      {/* 행 내 간단 오류표시(선택) */}
+      {/* 행 내 간단 오류표시 */}
       {err && <span className="ml-2 text-xs text-red-500">{err}</span>}
     </div>
   );
