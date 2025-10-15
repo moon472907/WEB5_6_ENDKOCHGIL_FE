@@ -195,16 +195,9 @@ export default function PartyDetailClient({ partyId }: { partyId: string }) {
             <div className="relative w-20 h-20 overflow-hidden rounded-md mb-2 bg-gray-100">
               {(() => {
                 const base = resolveItemIconSrc(m.item);
-                const bust =
-                  m.item?.id !== undefined && m.item?.id !== null
-                    ? (base.includes('?') ? `&v=${m.item.id}` : `?v=${m.item.id}`)
-                    : '';
-                const finalSrc = (base + bust).startsWith('http')
-                  ? base + bust
-                  : encodeURI(base + bust);
+                const finalSrc = base.startsWith('http') ? base : encodeURI(base);
                 return (
                   <Image
-                    key={finalSrc} // 아이템 변경 시 리렌더 유도
                     src={finalSrc}
                     alt={m.item?.name ?? '아이템'}
                     fill
