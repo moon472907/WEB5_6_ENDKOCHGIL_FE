@@ -173,7 +173,7 @@ export default function Page() {
 
   return (
     <ContentWrapper withNav className="relative overflow-hidden z-0">
-      <div className="">
+      <div>
         {/* 상단 요약 */}
         <div className="flex justify-center items-center gap-4 relative min-h-[130px]">
           <Image
@@ -260,6 +260,8 @@ export default function Page() {
       <div className="absolute bottom-0 right-0 pointer-events-none z-0">
         <div
           className="pointer-events-none w-[400px] min-w-[400px] max-w-[600px]"
+          style={{ transform: 'translateX(4%)' }}
+
         >
           <Image
             src="/images/sleep.png"
