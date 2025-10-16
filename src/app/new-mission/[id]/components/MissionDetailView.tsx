@@ -38,7 +38,7 @@ export default function MissionDetailView({ mission: initialMission }: Props) {
       try {
         const data = await getMyInfo();
         setMemberId(data.id);
-        console.log('로그인한 사용자 ID:', data.id);
+        // console.log('로그인한 사용자 ID:', data.id);
       } catch (err) {
         console.error('memberID 조회 실패:', err);
       }
@@ -98,13 +98,7 @@ export default function MissionDetailView({ mission: initialMission }: Props) {
             )
           )
         );
-
-        console.log('수정된 항목 업데이트 완료');
-      } else {
-        console.log('수정된 항목이 없지만 알림을 생성합니다.');
       }
-
-      console.log('memberId === ', memberId);
 
       // (2) 수정 유무 관계없이 알림 생성
       if (memberId) {

@@ -26,8 +26,8 @@ export interface TaskCompletion {
   taskId: number;
   status: 'PENDING' | 'COMPLETED' | 'SKIPPED';
   completedDate: string;
-  dailyProgressRate: number; // 하루 진행률 (0~100)
-  weeklyProgressRate: number; // 주간 진행률 (0~100)
-  missionProgressRate: number; // 전체 미션 진행률 (0~100)
+  dailyProgressRate: number;
+  weeklyProgressRate: number;
+  missionProgressRate: number;
   newTitles: string[];
 }
