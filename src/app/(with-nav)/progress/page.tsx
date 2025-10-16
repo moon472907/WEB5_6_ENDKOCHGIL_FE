@@ -173,7 +173,7 @@ export default function Page() {
 
   return (
     <ContentWrapper withNav className="relative overflow-hidden z-0">
-      <div className="min-h-screen">
+      <div className="">
         {/* 상단 요약 */}
         <div className="flex justify-center items-center gap-4 relative min-h-[130px]">
           <Image
@@ -230,7 +230,7 @@ export default function Page() {
         </div>
 
         {/* 리스트 렌더링 */}
-        <div className="mt-3 relative flex flex-col gap-y-3 pb-24 z-20">
+        <div className="mt-3 relative flex flex-col gap-y-3 pb-50 z-20">
           {loading ? (
             <div className="text-sm text-text-sub">로딩 중...</div>
           ) : filtered.length === 0 ? (
@@ -259,15 +259,14 @@ export default function Page() {
       {/* 하단 이미지: 뷰포트 기준으로 고정 */}
       <div className="absolute bottom-0 right-0 pointer-events-none z-0">
         <div
-          className="pointer-events-none w-[500px] min-w-[500px] max-w-[600px]"
-          style={{ transform: 'translateX(8%)' }}
+          className="pointer-events-none w-[400px] min-w-[400px] max-w-[600px]"
         >
           <Image
             src="/images/sleep.png"
             alt="다람쥐"
-            width={500}
-            height={500}
-            className="w-full h-auto object-contain"
+            width={400}
+            height={400}
+            className="object-contain w-[400px] h-[400px]"
           />
         </div>
       </div>
