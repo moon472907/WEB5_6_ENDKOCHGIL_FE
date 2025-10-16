@@ -56,8 +56,8 @@ export default function PartyCard({
   const [openResult, setOpenResult] = useState(false);
   const [openError, setOpenError] = useState(false);
   const [errorLines, setErrorLines] = useState<string[]>([
-    '참가 신청에 실패했습니다.',
-    '잠시 후 다시 시도해 주세요.',
+    '참가 신청에 실패했습니다',
+    '잠시 후 다시 시도해 주세요',
   ]);
   const isFull = (() => {
     if (!people) return false;
@@ -160,14 +160,14 @@ export default function PartyCard({
                 if (id !== undefined && id !== null) {
                   const joined = await checkAlreadyJoined(id);
                   if (joined) {
-                    setErrorLines(['현재 파티에 참여중입니다.', '해당 파티에서 활동을 계속하세요.']);
+                    setErrorLines(['이미 해당 파티에 참여 중이에요!', '오늘도 멋진 활동 기대할게요 ✨']);
                     setOpenError(true);
                     return;
                   }
                 }
                 // 2) 그다음 정원 초과 체크
                 if (isFull) {
-                  setErrorLines(['인원 초과로 신청이 불가능합니다.', '다음에 다시 시도해 주세요.']);
+                  setErrorLines(['파티 인원이 가득 찼어요', '다음에 다시 도전해 주세요!']);
                   setOpenError(true);
                   return;
                 }
@@ -190,13 +190,13 @@ export default function PartyCard({
           if (id) {
             // 1) 참여 여부 우선 가드
             if (await checkAlreadyJoined(id)) {
-              setErrorLines(['현재 파티에 참여중입니다.', '해당 파티에서 활동을 계속하세요.']);
+              setErrorLines(['이미 해당 파티에 참여 중이에요!', '오늘도 멋진 활동 기대할게요 ✨']);
               setOpenError(true);
               return;
             }
             // 2) 정원 초과 가드
             if (isFull) {
-              setErrorLines(['인원 초과로 신청이 불가능합니다.', '다음에 다시 시도해 주세요.']);
+              setErrorLines(['파티 인원이 가득 찼어요', '다음에 다시 도전해 주세요!']);
               setOpenError(true);
               return;
             }
@@ -224,9 +224,9 @@ export default function PartyCard({
                   ? err.message as string
                   : String(err);
               if (msg.includes('409') || /이미\s*(참가|참여)/.test(msg) || /ALREADY/i.test(msg)) {
-                setErrorLines(['이미 참가 중인 파티입니다.', '해당 파티에서 활동을 계속하세요.']);
+                setErrorLines(['이미 해당 파티에 참여 중이에요!', '오늘도 멋진 활동 기대할게요 ✨']);
               } else {
-                setErrorLines(['참가 신청에 실패했습니다.', '잠시 후 다시 시도해 주세요.']);
+                setErrorLines(['참가 신청에 실패했습니다', '잠시 후 다시 시도해 주세요']);
               }
               setOpenError(true);
             }
@@ -240,7 +240,7 @@ export default function PartyCard({
       {/* 신청 완료 안내 모달 */}
       <ConfirmModal
         open={openResult}
-        lines={['참가 신청이 완료되었습니다!', '파티장의 수락을 기다려주세요.']}
+        lines={['참가 신청이 완료되었어요!', '파티장의 수락을 기다려주세요']}
         onCancel={() => setOpenResult(false)}
         onConfirm={() => setOpenResult(false)}
         confirmText="확인"
