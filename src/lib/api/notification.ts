@@ -52,7 +52,6 @@ export async function createNotification(
     }
 
     const data = await res.json();
-    console.log('[createNotification] success:', data);
     return data;
   } catch (err) {
     console.error('[createNotification] 요청 실패:', err);
