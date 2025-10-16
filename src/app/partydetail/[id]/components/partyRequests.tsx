@@ -35,7 +35,6 @@ export default function PartyRequests({ partyId }: Props) {
   }, [load]);
 
   return (
-    // 부모 폭 우선 + 상한만 두기, 오버플로우 차단
     <div className="w-full max-w-[320px] space-y-3 overflow-hidden">
       <h3 className="text-lg font-semibold">신청 대기 목록</h3>
 
@@ -46,25 +45,19 @@ export default function PartyRequests({ partyId }: Props) {
       )}
 
       {!loading && !error && items.length > 0 && (
-        // 리스트 컨테이너 자체도 폭 고정 + overflow-hidden
         <ul className="w-full overflow-hidden rounded-xl border border-gray-200 divide-y divide-gray-100">
           {items.map(u => (
             <li
               key={u.id}
               className="flex items-center justify-between gap-3 bg-basic-white p-3"
             >
-              {/* 왼쪽 정보: 텍스트 수축 허용 */}
               <div className="min-w-0">
                 <div className="truncate text-sm font-medium text-gray-900">
                   {u.name}
                 </div>
                 <div className="truncate text-xs text-gray-500">{u.email}</div>
-                <div className="mt-0.5 text-[11px] text-gray-500">
-                  {u.status}
-                </div>
               </div>
 
-              {/* 오른쪽 버튼: 수축 금지로 폭 밀어내지 않게 */}
               <div className="shrink-0">
                 <PartyRequestDecision
                   partyId={partyId}
