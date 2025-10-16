@@ -1,4 +1,6 @@
 'use client';
+import { fetchPartyDetailClient } from '@/lib/api/parties/parties';
+import { createNotification } from '@/lib/api/notification';
 
 import Button from '@/components/ui/Button';
 import Tag from '@/components/ui/Tag';
@@ -201,6 +203,21 @@ export default function PartyCard({
             try {
               await joinPartyClient(id);
               setOpenResult(true);
+
+              // 3) 신청 성공 시 파티장에게 알림 발송
+              try {
+                const detail = await fetchPartyDetailClient(id);
+                const leaderId = typeof detail?.leaderId === 'number' ? detail.leaderId : undefined;
+                if (leaderId) {
+                  await createNotification({
+                    memberId: leaderId,
+                    message: `"${title}" 파티에 새로운 참가 신청이 도착했어요`,
+                    type: 'MESSAGE',
+                  });
+                }
+              } catch (nerr) {
+                console.warn('파티장 알림 전송 실패(무시):', nerr);
+              }
             } catch (err) {
               const msg =
                 (err && typeof err === 'object' && 'message' in err && typeof err.message === 'string')

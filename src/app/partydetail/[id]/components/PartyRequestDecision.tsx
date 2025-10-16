@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { acceptPartyRequest, rejectPartyRequest } from '@/lib/api/parties/partyrequestdecision';
 import type { PartyRequestItem } from '@/lib/api/parties/partyrequests';
+import { createNotification } from '@/lib/api/notification';
+import { fetchPartyDetailClient, type PartyApiItem } from '@/lib/api/parties/parties';
 
 type Props = {
   partyId: string | number;
@@ -29,6 +31,27 @@ export default function PartyRequestDecision({
     try {
       await acceptPartyRequest(partyId, request.id);
       if (onApprovedAction) await onApprovedAction(request.id);
+
+      // 승인 성공 시 신청자에게 알림 전송
+      try {
+        let partyTitle: string | undefined;
+        try {
+          const detail: PartyApiItem = await fetchPartyDetailClient(partyId);
+          partyTitle = detail?.name || detail?.missionTitle;
+        } catch {
+          // 제목 조회 실패시 무시하고 기본 문구 사용
+        }
+
+        await createNotification({
+          memberId: request.id,
+          message: partyTitle
+            ? `"${partyTitle}" 파티 참가가 승인되었습니다. 함께 시작해요!`
+            : `파티 참가가 승인되었습니다. 파티에서 함께 시작해요!`,
+          type: 'MESSAGE',
+        });
+      } catch (nerr) {
+        console.warn('신청자 알림 전송 실패(무시):', nerr);
+      }
     } catch (e) {
       console.error(e);
       setErr('승인에 실패했습니다.');
