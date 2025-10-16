@@ -5,8 +5,8 @@ export function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
   const accessToken = req.cookies.get('accessToken')?.value;
 
-  console.log('미들웨어 실행됨:', path);
-  console.log('accessToken:', accessToken ?? '없음');
+  // console.log('미들웨어 실행됨:', path);
+  // console.log('accessToken:', accessToken ?? '없음');
 
   // 로그인 페이지는 통과
   if (path.startsWith('/login')) {

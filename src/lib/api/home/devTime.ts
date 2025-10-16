@@ -11,5 +11,5 @@ export async function setDevTime(date: string) {
     throw new Error(`시간 고정 실패: ${res.statusText}`);
   }
 
-  console.log(`시스템 시간이 ${date}로 설정되었습니다.`);
+  // console.log(`시스템 시간이 ${date}로 설정되었습니다.`);
 }

@@ -14,8 +14,6 @@ export default function MissionCard({
   onStatusChange
 }: MissionCardProps) {
   const isSoloMission = !task.partyCompletion;
-  // console.log("isSoloMission = ", isSoloMission);
-  
   const completedMembers = isSoloMission
     ? task.status === 'COMPLETED'
       ? 1

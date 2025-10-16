@@ -43,11 +43,9 @@ export default function MissionCreateView({
       });
 
       const missionId = mission.content.missionId;
-      console.log('미션 생성 완료:', mission);
+      // console.log('미션 생성 완료:', mission);
       router.push(`/new-mission/${missionId}`);
     } catch (error) {
-      console.log("error ===", error);
-      
       const message =
         error instanceof Error
           ? error.message

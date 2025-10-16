@@ -9,18 +9,15 @@ export default async function Page() {
 
   try {
     const data = await getProfile(accessToken);
-    console.log('getProfile data', data);
+    // console.log('getProfile data', data);
 
     if (data.success && data.content.valid) {
-      console.log('getProfile valid true! ');
-      
       redirect('/');
     }
   } catch (error: unknown) {
-    // TODO : alert? modal? toast?
     const e = error as Error;
-  if (e.message === 'NEXT_REDIRECT') throw e;
-  console.log('프로필 조회 에러 발생:', e.message);
+    if (e.message === 'NEXT_REDIRECT') throw e;
+    console.error('프로필 조회 에러 발생:', e.message);
   }
 
   return <ProfileForm />;

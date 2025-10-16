@@ -10,7 +10,7 @@ import { handleAuthError } from '../error';
 export async function createMission(
   data: CreateMissionRequest
 ): Promise<MissionResponse> {
-  console.log('data = :', JSON.stringify(data));
+  // console.log('data = :', JSON.stringify(data));
 
   const res = await fetch(`${BASE_URL}/api/v1/missions`, {
     method: 'POST',
@@ -21,7 +21,7 @@ export async function createMission(
     body: JSON.stringify(data)
   });
 
-  console.log('미션 생성 res', res);
+  // console.log('미션 생성 res', res);
 
   if (!res.ok) {
     await handleAuthError(res, '미션 생성 실패');
@@ -74,7 +74,7 @@ export async function updateWeekTasks(
     await handleAuthError(res, '주차별 task 수정 실패');
   }
 
-  console.log('Task 수정 완료');
+  // console.log('Task 수정 완료');
 }
 
 /**

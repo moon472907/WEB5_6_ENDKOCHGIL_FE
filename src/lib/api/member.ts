@@ -35,7 +35,7 @@ export async function getProfile(accessToken: string | undefined) {
     }
   );
 
-  console.log("프로필 조회 res", res);
+  // console.log("프로필 조회 res", res);
 
   if (!res.ok) throw new Error('프로필 조회 실패');
   return res.json();
@@ -119,7 +119,7 @@ export async function logout() {
     }
 
     const data = await res.json();
-    console.log('로그아웃 성공:', data);
+    // console.log('로그아웃 성공:', data);
     return true;
   } catch (error) {
     console.error('로그아웃 요청 중 에러:', error);
@@ -146,7 +146,7 @@ export async function unregister() {
     }
 
     const data = await res.json();
-    console.log('회원 탈퇴 성공:', data);
+    // console.log('회원 탈퇴 성공:', data);
     return true;
   } catch (error) {
     console.error('회원 탈퇴 요청 중 에러:', error);

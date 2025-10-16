@@ -12,6 +12,7 @@ import { updateWeekTasks } from '@/lib/api/mission/mission';
 import { createNotification } from '@/lib/api/notification';
 import { getMyInfo } from '@/lib/api/member';
 import { useNotificationStore } from '@/app/home/components/notification/useNotificationStore';
+import AlertModal from '@/components/modal/AlertModal';
 
 interface EditedTask {
   subGoalId: number;
@@ -29,6 +30,7 @@ export default function MissionDetailView({ mission: initialMission }: Props) {
   const [editedTasks, setEditedTasks] = useState<EditedTask[]>([]); // 사용자가 실제로 수정한 task
   const [memberId, setMemberId] = useState<number | null>(null);
   const addNotification = useNotificationStore(state => state.addNotification);
+  const [alertOpen, setAlertOpen] = useState(false); // AlertModal 상태
 
   // 로그인 사용자 정보(알림용) 가져오기
   useEffect(() => {
@@ -36,7 +38,7 @@ export default function MissionDetailView({ mission: initialMission }: Props) {
       try {
         const data = await getMyInfo();
         setMemberId(data.id);
-        console.log('로그인한 사용자 ID:', data.id);
+        // console.log('로그인한 사용자 ID:', data.id);
       } catch (err) {
         console.error('memberID 조회 실패:', err);
       }
@@ -96,13 +98,7 @@ export default function MissionDetailView({ mission: initialMission }: Props) {
             )
           )
         );
-
-        console.log('수정된 항목 업데이트 완료');
-      } else {
-        console.log('수정된 항목이 없지만 알림을 생성합니다.');
       }
-
-      console.log('memberId === ', memberId);
 
       // (2) 수정 유무 관계없이 알림 생성
       if (memberId) {
@@ -118,7 +114,7 @@ export default function MissionDetailView({ mission: initialMission }: Props) {
       router.push('/');
     } catch (err) {
       console.error('미션 생성 완료 또는 알림 처리 실패:', err);
-      alert('미션 생성 완료 중 오류가 발생했어요.');
+      setAlertOpen(true);
     }
   };
 
@@ -142,6 +138,13 @@ export default function MissionDetailView({ mission: initialMission }: Props) {
             미션 생성 완료
           </Button>
         </form>
+        <AlertModal
+          open={alertOpen}
+          onConfirm={() => setAlertOpen(false)}
+          title="미션 상세 수정 실패"
+          detail={'완료된 미션 수정 중 오류가 발생했어요'}
+          confirmText="확인"
+        />
       </ContentWrapper>
     </>
   );
