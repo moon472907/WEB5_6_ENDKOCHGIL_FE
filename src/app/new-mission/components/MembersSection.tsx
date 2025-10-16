@@ -10,7 +10,10 @@ interface MembersSectionProps {
   onChange: (v: number | null) => void;
 }
 
-export default function MembersSection({ maxMembers, onChange }: MembersSectionProps) {
+export default function MembersSection({
+  maxMembers,
+  onChange
+}: MembersSectionProps) {
   return (
     <FormSection
       icon={<MdGroup size={20} className="text-button-point" />}

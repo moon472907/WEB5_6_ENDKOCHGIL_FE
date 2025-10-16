@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import useOutsideClick from '@/hooks/useOutsideClick';
+import { useRef, useState } from 'react';
 import { FiChevronDown } from 'react-icons/fi';
 
 interface Option {
@@ -19,20 +20,25 @@ export default function CustomSelectBox({
   options,
   value,
   onChange,
-  placeholder = '선택해주세요',
+  placeholder = '선택해주세요'
 }: CustomSelectBoxProps) {
   const [open, setOpen] = useState(false);
+  const selectRef = useRef<HTMLDivElement>(null);
+  const selectedOption = options.find(o => o.value === value);
 
-  const selectedOption = options.find((o) => o.value === value);
+  // 외부 클릭 감지해서 닫기
+  useOutsideClick(selectRef, () => setOpen(false), open);
 
   return (
-    <div className="relative w-full">
+    <div ref={selectRef} className="relative w-full">
       <button
         type="button"
         className="flex w-full items-center cursor-pointer justify-between rounded-xl p-3 border-none bg-button-unselected focus:outline-none "
-        onClick={() => setOpen((prev) => !prev)}
+        onClick={() => setOpen(prev => !prev)}
       >
-        <span className={selectedOption ? 'text-stone-800' : 'text-stone-500' }>{selectedOption ? selectedOption.label : placeholder}</span>
+        <span className={selectedOption ? 'text-stone-800' : 'text-stone-500'}>
+          {selectedOption ? selectedOption.label : placeholder}
+        </span>
         <FiChevronDown
           className={`transition-transform ${open ? 'rotate-180' : ''}`}
         />
@@ -40,7 +46,7 @@ export default function CustomSelectBox({
 
       {open && (
         <ul className="absolute p-1 flex flex-col gap-1 z-10 mt-1 w-full rounded-lg border border-gray-200 bg-basic-white shadow-lg text-stone-800">
-          {options.map((option) => (
+          {options.map(option => (
             <li
               key={option.value}
               className={`cursor-pointer px-3 py-2 text-sm has-hover:bg-bg-main active:bg-bg-main rounded-lg ${
