@@ -8,16 +8,14 @@ import HomeClientWrapper from './home/components/HomeClientWrapper';
 export default async function Home() {
   const cookieStore = cookies();
   const accessToken = (await cookieStore).get('accessToken')?.value;
-
+  console.log('[SSR] accessToken =', accessToken);
   try {
     if (process.env.NODE_ENV === 'development') {
       await setDevTime('2025-10-13');
     }
 
-    const [tasks, profile] = await Promise.all([
-      getTodayTask(accessToken),
-      getMyInfo(accessToken),
-    ]);
+    const tasks = await getTodayTask(accessToken);
+    const profile = await getMyInfo(accessToken);
 
     return (
       <HomeClientWrapper
