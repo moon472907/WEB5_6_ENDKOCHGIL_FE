@@ -6,6 +6,7 @@ import HeaderSection from './HeaderSection';
 import CharacterSection from './CharacterSection';
 import MissionListSection from './MissionListSection';
 import { getTodayTask } from '@/lib/api/home/task';
+import { getTodayTaskClient  } from '@/lib/api/home/task';
 import { getMyInfo } from '@/lib/api/member';
 import { Task } from '../types/task';
 import { UserProfile } from '@/types/profile';
@@ -28,7 +29,8 @@ export default function HomeClientWrapper({
   const refreshData = async () => {
     try {
       const [updatedTasks, updatedProfile] = await Promise.all([
-        getTodayTask(),
+        // getTodayTask(),
+        getTodayTaskClient (),
         getMyInfo(accessToken)
       ]);
       setTasks(updatedTasks);
